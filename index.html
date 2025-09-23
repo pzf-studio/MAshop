@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MA Furniture - Интернет-магазин элитной мебели</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <span class="logo-text">MA FURNITURE</span>
+                        <span class="logo-subtitle">Элитная мебель</span>
+                    </a>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="#catalog">Каталог</a></li>
+                        <li><a href="#about">О компании</a></li>
+                        <li><a href="#reviews">Отзывы</a></li>
+                        <li><a href="#delivery">Доставка</a></li>
+                        <li><a href="#contacts">Контакты</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="header-actions">
+                    <button class="cart-btn" id="cartBtn">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <button class="menu-toggle" id="menuToggle">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Элитная мебель ручной работы</h1>
+                <p class="hero-subtitle">Превратите ваше пространство в произведение искусства с мебелью премиум-класса</p>
+                <div class="hero-actions">
+                    <a href="#catalog" class="btn btn-primary">Смотреть каталог</a>
+                    <a href="#consultation" class="btn btn-secondary">Получить консультацию</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">5+</span>
+                        <span class="stat-text">лет гарантии</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100+</span>
+                        <span class="stat-text">довольных клиентов</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">24/7</span>
+                        <span class="stat-text">поддержка</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catalog Section -->
+    <section class="catalog" id="catalog">
+        <div class="container">
+            <h2 class="section-title">Каталог товаров</h2>
+            <div class="catalog-filters">
+                <button class="filter-btn active" data-filter="all">Все товары</button>
+                <button class="filter-btn" data-filter="pantograph">Пантографы</button>
+                <button class="filter-btn" data-filter="wardrobe">Гардеробные системы</button>
+                <button class="filter-btn" data-filter="premium">Премиум коллекция</button>
+            </div>
+            
+            <div class="products-grid">
+                <!-- Product 1 -->
+                <div class="product-card" data-category="pantograph">
+                    <div class="product-image">
+                        <img src="images/example.png" alt="Электрический пантограф Deluxe">
+                        <div class="product-badge">Хит продаж</div>
+                        <button class="quick-view" data-product="1">Быстрый просмотр</button>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Электрический пантограф Deluxe</h3>
+                        <div class="product-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="rating-count">(15 отзывов)</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">45 990 ₽</span>
+                            <span class="old-price">52 990 ₽</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-cart" data-product="1">В корзину</button>
+                            <button class="btn-wishlist">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 2 -->
+                <div class="product-card" data-category="pantograph">
+                    <div class="product-image">
+                        <img src="images/example.png" alt="Электрический пантограф Basic">
+                        <button class="quick-view" data-product="2">Быстрый просмотр</button>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Электрический пантограф Basic</h3>
+                        <div class="product-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-count">(8 отзывов)</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">32 990 ₽</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-cart" data-product="2">В корзину</button>
+                            <button class="btn-wishlist">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 3 -->
+                <div class="product-card" data-category="wardrobe">
+                    <div class="product-image">
+                        <img src="images/example.png" alt="Гардеробная система Premium">
+                        <div class="product-badge">Новинка</div>
+                        <button class="quick-view" data-product="3">Быстрый просмотр</button>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Гардеробная система Premium</h3>
+                        <div class="product-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="rating-count">(12 отзывов)</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">89 990 ₽</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-cart" data-product="3">В корзину</button>
+                            <button class="btn-wishlist">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 4 -->
+                <div class="product-card" data-category="premium">
+                    <div class="product-image">
+                        <img src="images/example.png" alt="Эксклюзивный гардероб">
+                        <button class="quick-view" data-product="4">Быстрый просмотр</button>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title">Эксклюзивный гардероб Black Edition</h3>
+                        <div class="product-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="rating-count">(6 отзывов)</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price">125 990 ₽</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-cart" data-product="4">В корзину</button>
+                            <button class="btn-wishlist">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="catalog-actions">
+                <a href="catalog.html" class="btn btn-outline">Смотреть все товары</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Почему выбирают нас</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h3>Премиальное качество</h3>
+                    <p>Используем только лучшие материалы и фурнитуру от европейских производителей</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3>Ручная сборка</h3>
+                    <p>Каждое изделие собирается вручную с вниманием к каждой детали</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Гарантия 5 лет</h3>
+                    <p>Предоставляем расширенную гарантию на всю нашу продукцию</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h3>Бесплатная доставка</h3>
+                    <p>Доставляем заказы по всей России бесплатно при сумме от 50 000 ₽</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Consultation Section -->
+    <section class="consultation" id="consultation">
+        <div class="container">
+            <div class="consultation-content">
+                <div class="consultation-text">
+                    <h2>Нужна консультация?</h2>
+                    <p>Наши специалисты помогут подобрать идеальное решение для вашего интерьера</p>
+                    <ul class="consultation-benefits">
+                        <li><i class="fas fa-check"></i> Бесплатный замер</li>
+                        <li><i class="fas fa-check"></i> 3D-визуализация</li>
+                        <li><i class="fas fa-check"></i> Индивидуальный подход</li>
+                    </ul>
+                </div>
+                <div class="consultation-form">
+                    <form id="consultationForm">
+                        <input type="text" placeholder="Ваше имя" required>
+                        <input type="tel" placeholder="Телефон" required>
+                        <textarea placeholder="Расскажите о вашем проекте"></textarea>
+                        <button type="submit" class="btn btn-primary">Получить консультацию</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Корзина</h3>
+            <button class="cart-close" id="cartClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cart-items">
+            <!-- Cart items will be added dynamically -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Итого:</span>
+                <span class="total-price">0 ₽</span>
+            </div>
+            <button class="btn btn-primary btn-checkout">Оформить заказ</button>
+        </div>
+    </div>
+
+    <!-- Quick View Modal -->
+    <div class="modal" id="quickViewModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-body">
+                <!-- Modal content will be added dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
