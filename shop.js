@@ -230,7 +230,9 @@ function initializeProducts() {
     // Initialize filters
     function initializeFilters() {
         const filterBtns = document.querySelectorAll('.filter-btn');
+        const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
         
+        // Обработка кнопок фильтров
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 // Update active filter
@@ -242,6 +244,37 @@ function initializeProducts() {
                 currentPage = 1;
                 
                 // Re-render products
+                renderProducts();
+            });
+        });
+        
+        // Обработка ссылок в боковой навигации
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Убрать активный класс у всех ссылок
+                navLinks.forEach(l => l.classList.remove('active'));
+                // Добавить активный класс к текущей ссылке
+                link.classList.add('active');
+                
+                // Определить фильтр на основе href
+                const filter = link.getAttribute('href').replace('#', '');
+                if (filter === 'shop.html') {
+                    currentFilter = 'all';
+                } else {
+                    currentFilter = filter;
+                }
+                
+                // Обновить активную кнопку фильтра
+                filterBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.filter === currentFilter) {
+                        btn.classList.add('active');
+                    }
+                });
+                
+                currentPage = 1;
                 renderProducts();
             });
         });
