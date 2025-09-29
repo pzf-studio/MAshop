@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в админ-панель - MA Furniture</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shop.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255,255,255,1) 100%);
+            padding: 20px;
+        }
+        
+        .login-form {
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .login-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-title {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: #d4af37;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            background: #b8941f;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-form">
+            <div class="login-logo">
+                <span style="font-size: 1.8rem; font-weight: 700; letter-spacing: 2px;">MA FURNITURE</span>
+                <br>
+                <span style="color: #d4af37;">Админ-панель</span>
+            </div>
+            
+            <h2 class="login-title">Вход в систему</h2>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Имя пользователя</label>
+                    <input type="text" id="username" name="username" required autocomplete="off">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn-login">Войти</button>
+                
+                <div class="error-message" id="errorMessage">
+                    Неверные учетные данные
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Вставьте этот код в тег <script> в admin-login.html
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Проверка учетных данных
+            if (username === 'admin' && password === 'admin123') {
+                // Генерируем токен сессии
+                const sessionToken = generateSessionToken();
+                const sessionData = {
+                    token: sessionToken,
+                    expires: Date.now() + (2 * 60 * 60 * 1000) // 2 часа
+                };
+                
+                localStorage.setItem('adminSession', JSON.stringify(sessionData));
+                
+                // Логируем успешный вход
+                logAdminAction('login_success');
+                
+                window.location.href = 'admin.html';
+            } else {
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 3000);
+                
+                // Логируем неудачную попытку входа
+                logAdminAction('login_failed', { username: username });
+            }
+        });
+
+        function generateSessionToken() {
+            return 'token_' + Math.random().toString(36).substr(2) + Date.now().toString(36);
+        }
+
+        function logAdminAction(action, details = {}) {
+            try {
+                const logs = JSON.parse(localStorage.getItem('adminLogs') || '[]');
+                const logEntry = {
+                    timestamp: new Date().toISOString(),
+                    action: action,
+                    details: details,
+                    userAgent: navigator.userAgent
+                };
+                
+                logs.unshift(logEntry);
+                
+                if (logs.length > 100) {
+                    logs.pop();
+                }
+                
+                localStorage.setItem('adminLogs', JSON.stringify(logs));
+            } catch (error) {
+                console.error('Logging error:', error);
+            }
+        }
+
+        // Проверяем, если пользователь уже авторизован - перенаправляем в админку
+        if (localStorage.getItem('adminSession')) {
+            const session = JSON.parse(localStorage.getItem('adminSession'));
+            if (session.expires > Date.now()) {
+                window.location.href = 'admin.html';
+            } else {
+                localStorage.removeItem('adminSession');
+            }
+        }
+    </script>
+</body>
+</html>

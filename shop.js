@@ -3,6 +3,16 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
+// Listen for products updates from admin panel
+window.addEventListener('message', function(event) {
+    if (event.data.type === 'PRODUCTS_UPDATED') {
+        // Перезагружаем товары при обновлении из админки
+        if (window.productsGrid) {
+            loadProducts();
+        }
+    }
+});
+
 function initializeApp() {
     // Initialize products and pagination
     initializeProducts();
@@ -18,87 +28,87 @@ function initializeApp() {
     
     // Initialize mobile menu
     initializeMobileMenu();
-    
-    // Initialize consultation form
-    initializeConsultationForm();
 }
 
-// Products data
-const productsData = [
-    // Страница 1 (1-15)
-    { id: 1, name: "Тест товар 1", price: 45990, category: "pantograph", badge: "Хит продаж" },
-    { id: 2, name: "Тест товар 2", price: 32990, category: "pantograph" },
-    { id: 3, name: "Тест товар 3", price: 89990, category: "wardrobe", badge: "Новинка" },
-    { id: 4, name: "Тест товар 4", price: 125990, category: "premium" },
-    { id: 5, name: "Тест товар 5", price: 75990, category: "wardrobe" },
-    { id: 6, name: "Тест товар 6", price: 56990, category: "pantograph" },
-    { id: 7, name: "Тест товар 7", price: 98990, category: "premium", badge: "Хит продаж" },
-    { id: 8, name: "Тест товар 8", price: 42990, category: "pantograph" },
-    { id: 9, name: "Тест товар 9", price: 67990, category: "wardrobe" },
-    { id: 10, name: "Тест товар 10", price: 112990, category: "premium" },
-    { id: 11, name: "Тест товар 11", price: 38990, category: "pantograph" },
-    { id: 12, name: "Тест товар 12", price: 82990, category: "wardrobe", badge: "Новинка" },
-    { id: 13, name: "Тест товар 13", price: 95990, category: "premium" },
-    { id: 14, name: "Тест товар 14", price: 49990, category: "pantograph" },
-    { id: 15, name: "Тест товар 15", price: 72990, category: "wardrobe" },
-    
-    // Страница 2 (16-30)
-    { id: 16, name: "Тест товар 16", price: 53990, category: "pantograph" },
-    { id: 17, name: "Тест товар 17", price: 87990, category: "wardrobe", badge: "Хит продаж" },
-    { id: 18, name: "Тест товар 18", price: 119990, category: "premium" },
-    { id: 19, name: "Тест товар 19", price: 46990, category: "pantograph" },
-    { id: 20, name: "Тест товар 20", price: 78990, category: "wardrobe" },
-    { id: 21, name: "Тест товар 21", price: 102990, category: "premium", badge: "Новинка" },
-    { id: 22, name: "Тест товар 22", price: 35990, category: "pantograph" },
-    { id: 23, name: "Тест товар 23", price: 69990, category: "wardrobe" },
-    { id: 24, name: "Тест товар 24", price: 92990, category: "premium" },
-    { id: 25, name: "Тест товар 25", price: 41990, category: "pantograph" },
-    { id: 26, name: "Тест товар 26", price: 84990, category: "wardrobe" },
-    { id: 27, name: "Тест товар 27", price: 109990, category: "premium", badge: "Хит продаж" },
-    { id: 28, name: "Тест товар 28", price: 38990, category: "pantograph" },
-    { id: 29, name: "Тест товар 29", price: 76990, category: "wardrobe" },
-    { id: 30, name: "Тест товар 30", price: 99990, category: "premium" },
-    
-    // Страница 3 (31-45)
-    { id: 31, name: "Тест товар 31", price: 44990, category: "pantograph", badge: "Новинка" },
-    { id: 32, name: "Тест товар 32", price: 81990, category: "wardrobe" },
-    { id: 33, name: "Тест товар 33", price: 115990, category: "premium" },
-    { id: 34, name: "Тест товар 34", price: 37990, category: "pantograph" },
-    { id: 35, name: "Тест товар 35", price: 73990, category: "wardrobe", badge: "Хит продаж" },
-    { id: 36, name: "Тест товар 36", price: 96990, category: "premium" },
-    { id: 37, name: "Тест товар 37", price: 40990, category: "pantograph" },
-    { id: 38, name: "Тест товар 38", price: 88990, category: "wardrobe" },
-    { id: 39, name: "Тест товар 39", price: 122990, category: "premium", badge: "Новинка" },
-    { id: 40, name: "Тест товар 40", price: 48990, category: "pantograph" },
-    { id: 41, name: "Тест товар 41", price: 79990, category: "wardrobe" },
-    { id: 42, name: "Тест товар 42", price: 105990, category: "premium" },
-    { id: 43, name: "Тест товар 43", price: 42990, category: "pantograph" },
-    { id: 44, name: "Тест товар 44", price: 85990, category: "wardrobe", badge: "Хит продаж" },
-    { id: 45, name: "Тест товар 45", price: 118990, category: "premium" }
-];
+// Products data - будет загружаться из localStorage
+let productsData = [];
 
 // Products and pagination functionality
 function initializeProducts() {
     const productsGrid = document.getElementById('productsGrid');
     const pagination = document.getElementById('pagination');
     const itemsPerPage = 15;
-    const totalPages = Math.ceil(productsData.length / itemsPerPage);
     let currentPage = 1;
     let currentFilter = 'all';
 
+    // Получаем активные товары из localStorage
+    function getActiveProducts() {
+        let products = [];
+        
+        try {
+            products = JSON.parse(localStorage.getItem('products')) || [];
+        } catch (error) {
+            console.error('Load products error:', error);
+            products = [];
+        }
+        
+        // Если нет товаров в localStorage, создаем начальные данные
+        if (products.length === 0) {
+            products = [
+                { id: 1, name: "Пантограф Classic Gold", price: 45990, category: "pantograph", badge: "Хит продаж", active: true },
+                { id: 2, name: "Пантограф Modern Silver", price: 32990, category: "pantograph", active: true },
+                { id: 3, name: "Гардеробная система Lux", price: 89990, category: "wardrobe", badge: "Новинка", active: true },
+                { id: 4, name: "Премиум гарнитур Imperial", price: 125990, category: "premium", active: true },
+                { id: 5, name: "Гардеробная система Comfort", price: 75990, category: "wardrobe", active: true },
+                { id: 6, name: "Пантограф Elegance", price: 56990, category: "pantograph", active: true },
+                { id: 7, name: "Премиум комплект Royal", price: 98990, category: "premium", badge: "Хит продаж", active: true },
+                { id: 8, name: "Пантограф Minimal", price: 42990, category: "pantograph", active: true },
+                { id: 9, name: "Гардеробная система Smart", price: 67990, category: "wardrobe", active: true },
+                { id: 10, name: "Премиум набор Prestige", price: 112990, category: "premium", active: true },
+                { id: 11, name: "Пантограф Compact", price: 38990, category: "pantograph", active: true },
+                { id: 12, name: "Гардеробная система Pro", price: 82990, category: "wardrobe", badge: "Новинка", active: true },
+                { id: 13, name: "Премиум коллекция Elite", price: 95990, category: "premium", active: true },
+                { id: 14, name: "Пантограф Standard", price: 49990, category: "pantograph", active: true },
+                { id: 15, name: "Гардеробная система Basic", price: 72990, category: "wardrobe", active: true }
+            ];
+            
+            try {
+                localStorage.setItem('products', JSON.stringify(products));
+            } catch (error) {
+                console.error('Save default products error:', error);
+            }
+        }
+        
+        // Фильтруем только активные товары
+        return products.filter(product => product.active === true);
+    }
+
     // Render products for current page and filter
     function renderProducts() {
+        const activeProducts = getActiveProducts();
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         
-        let filteredProducts = productsData;
+        let filteredProducts = activeProducts;
         if (currentFilter !== 'all') {
-            filteredProducts = productsData.filter(product => product.category === currentFilter);
+            filteredProducts = activeProducts.filter(product => product.category === currentFilter);
         }
         
         const productsToShow = filteredProducts.slice(startIndex, endIndex);
         
         productsGrid.innerHTML = '';
+        
+        if (productsToShow.length === 0) {
+            productsGrid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #666;">
+                    <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h3>Товары не найдены</h3>
+                    <p>${activeProducts.length === 0 ? 'Нет активных товаров' : 'Нет товаров в выбранной категории'}</p>
+                </div>
+            `;
+            pagination.innerHTML = '';
+            return;
+        }
         
         productsToShow.forEach(product => {
             const productCard = createProductCard(product);
@@ -116,12 +126,11 @@ function initializeProducts() {
         card.dataset.category = product.category;
         
         const badge = product.badge ? `<div class="product-badge">${product.badge}</div>` : '';
-        const oldPrice = product.oldPrice ? `<span class="old-price">${product.oldPrice} ₽</span>` : '';
         
         card.innerHTML = `
             <div class="product-image">
                 <div style="width: 100%; height: 100%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 1.2rem;">
-                    ТЕСТ ИЗОБРАЖЕНИЕ
+                    ${product.name}
                 </div>
                 ${badge}
                 <button class="quick-view" data-product="${product.id}">Быстрый просмотр</button>
@@ -139,8 +148,7 @@ function initializeProducts() {
                     <span class="rating-count">(${Math.floor(Math.random() * 20) + 5} отзывов)</span>
                 </div>
                 <div class="product-price">
-                    <span class="current-price">${product.price} ₽</span>
-                    ${oldPrice}
+                    <span class="current-price">${formatPrice(product.price)}</span>
                 </div>
                 <div class="product-actions">
                     <button class="btn btn-cart" data-product="${product.id}">В корзину</button>
@@ -206,6 +214,13 @@ function initializeProducts() {
             btn.addEventListener('click', (e) => {
                 const productId = parseInt(e.target.dataset.product);
                 addToCart(productId);
+                
+                // Анимация добавления в корзину
+                const productCard = e.target.closest('.product-card');
+                productCard.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    productCard.style.transform = '';
+                }, 300);
             });
         });
         
@@ -223,6 +238,14 @@ function initializeProducts() {
                 e.target.classList.toggle('far');
                 e.target.classList.toggle('fas');
                 e.target.classList.toggle('active');
+                
+                // Анимация добавления в избранное
+                if (e.target.classList.contains('fas')) {
+                    e.target.style.color = '#d4af37';
+                    showNotification('Товар добавлен в избранное');
+                } else {
+                    e.target.style.color = '';
+                }
             });
         });
     }
@@ -230,9 +253,7 @@ function initializeProducts() {
     // Initialize filters
     function initializeFilters() {
         const filterBtns = document.querySelectorAll('.filter-btn');
-        const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
         
-        // Обработка кнопок фильтров
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 // Update active filter
@@ -247,38 +268,10 @@ function initializeProducts() {
                 renderProducts();
             });
         });
-        
-        // Обработка ссылок в боковой навигации
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                // Убрать активный класс у всех ссылок
-                navLinks.forEach(l => l.classList.remove('active'));
-                // Добавить активный класс к текущей ссылке
-                link.classList.add('active');
-                
-                // Определить фильтр на основе href
-                const filter = link.getAttribute('href').replace('#', '');
-                if (filter === 'shop.html') {
-                    currentFilter = 'all';
-                } else {
-                    currentFilter = filter;
-                }
-                
-                // Обновить активную кнопку фильтра
-                filterBtns.forEach(btn => {
-                    btn.classList.remove('active');
-                    if (btn.dataset.filter === currentFilter) {
-                        btn.classList.add('active');
-                    }
-                });
-                
-                currentPage = 1;
-                renderProducts();
-            });
-        });
     }
+
+    // Load products function for external calls
+    window.loadProducts = renderProducts;
 
     // Initial render
     renderProducts();
@@ -301,16 +294,32 @@ function initializeCart() {
         cartItems.innerHTML = '';
         
         if (cart.length === 0) {
-            cartItems.innerHTML = '<p style="text-align: center; padding: 2rem;">Корзина пуста</p>';
+            cartItems.innerHTML = `
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
+                    <p style="text-align: center; color: #666;">Корзина пуста</p>
+                </div>
+            `;
             cartCount.textContent = '0';
             totalPrice.textContent = '0 ₽';
+            checkoutBtn.disabled = true;
+            checkoutBtn.style.opacity = '0.6';
             return;
         }
+        
+        checkoutBtn.disabled = false;
+        checkoutBtn.style.opacity = '1';
         
         let total = 0;
         
         cart.forEach(item => {
-            const product = productsData.find(p => p.id === item.id);
+            const product = getActiveProducts().find(p => p.id === item.id);
+            if (!product) {
+                // Если товар больше не активен, удаляем его из корзины
+                removeFromCart(item.id);
+                return;
+            }
+            
             const itemTotal = product.price * item.quantity;
             total += itemTotal;
             
@@ -319,13 +328,13 @@ function initializeCart() {
             cartItem.innerHTML = `
                 <div class="cart-item-info">
                     <h4>${product.name}</h4>
-                    <p>${product.price} ₽ × ${item.quantity}</p>
+                    <p>${formatPrice(product.price)} × ${item.quantity} = ${formatPrice(itemTotal)}</p>
                 </div>
                 <div class="cart-item-actions">
                     <button class="quantity-btn minus" data-id="${product.id}">-</button>
-                    <span>${item.quantity}</span>
+                    <span class="quantity-display">${item.quantity}</span>
                     <button class="quantity-btn plus" data-id="${product.id}">+</button>
-                    <button class="remove-btn" data-id="${product.id}">
+                    <button class="remove-btn" data-id="${product.id}" title="Удалить">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -334,7 +343,7 @@ function initializeCart() {
         });
         
         cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-        totalPrice.textContent = `${total} ₽`;
+        totalPrice.textContent = formatPrice(total);
         
         attachCartEventListeners();
     }
@@ -366,8 +375,28 @@ function initializeCart() {
         });
     }
     
+    // Get active products for cart
+    function getActiveProducts() {
+        let products = [];
+        
+        try {
+            products = JSON.parse(localStorage.getItem('products')) || [];
+        } catch (error) {
+            console.error('Load products error:', error);
+            products = [];
+        }
+        
+        return products.filter(product => product.active === true);
+    }
+    
     // Add product to cart
     function addToCart(productId) {
+        const product = getActiveProducts().find(p => p.id === productId);
+        if (!product) {
+            showNotification('Товар недоступен', 'error');
+            return;
+        }
+        
         const existingItem = cart.find(item => item.id === productId);
         
         if (existingItem) {
@@ -378,6 +407,9 @@ function initializeCart() {
         
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartDisplay();
+        
+        // Show notification
+        showNotification(`${product.name} добавлен в корзину`);
         
         // Show cart sidebar
         cartSidebar.classList.add('active');
@@ -402,7 +434,19 @@ function initializeCart() {
     
     // Remove product from cart
     function removeFromCart(productId) {
+        const product = getActiveProducts().find(p => p.id === productId);
         cart = cart.filter(item => item.id !== productId);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartDisplay();
+        
+        if (product) {
+            showNotification(`${product.name} удален из корзины`);
+        }
+    }
+    
+    // Clear cart
+    function clearCart() {
+        cart = [];
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartDisplay();
     }
@@ -418,15 +462,28 @@ function initializeCart() {
     
     checkoutBtn.addEventListener('click', () => {
         if (cart.length === 0) {
-            alert('Корзина пуста');
+            showNotification('Корзина пуста', 'error');
             return;
         }
         
-        alert('Заказ оформлен! Спасибо за покупку!');
-        cart = [];
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartDisplay();
+        const total = cart.reduce((sum, item) => {
+            const product = getActiveProducts().find(p => p.id === item.id);
+            return sum + (product ? product.price * item.quantity : 0);
+        }, 0);
+        
+        // Здесь можно добавить логику оформления заказа
+        showNotification(`Заказ оформлен! Сумма: ${formatPrice(total)}`, 'success');
+        clearCart();
         cartSidebar.classList.remove('active');
+    });
+    
+    // Close cart when clicking outside
+    document.addEventListener('click', (e) => {
+        if (cartSidebar.classList.contains('active') && 
+            !cartSidebar.contains(e.target) && 
+            !cartBtn.contains(e.target)) {
+            cartSidebar.classList.remove('active');
+        }
     });
     
     // Initial cart display
@@ -453,31 +510,42 @@ function initializeModal() {
 function showProductModal(productId) {
     const modal = document.getElementById('quickViewModal');
     const modalBody = document.querySelector('.modal-body');
-    const product = productsData.find(p => p.id === productId);
+    const product = getActiveProducts().find(p => p.id === productId);
     
-    if (!product) return;
+    if (!product) {
+        showNotification('Товар недоступен', 'error');
+        return;
+    }
     
     modalBody.innerHTML = `
         <div class="modal-product">
             <div class="modal-product-image">
                 <div style="width: 100%; height: 300px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 1.5rem;">
-                    ТЕСТ ИЗОБРАЖЕНИЕ
+                    ${product.name}
                 </div>
             </div>
             <div class="modal-product-info">
                 <h2>${product.name}</h2>
                 <div class="modal-product-price">
-                    <span class="current-price">${product.price} ₽</span>
+                    <span class="current-price">${formatPrice(product.price)}</span>
                 </div>
                 <div class="modal-product-description">
-                    <p>Это тестовое описание товара. Здесь будет размещена подробная информация о продукте, его характеристиках и преимуществах.</p>
+                    <p>Элитный ${product.category === 'pantograph' ? 'пантограф' : product.category === 'wardrobe' ? 'гардероб' : 'мебельный гарнитур'} премиум-класса. Изготовлен из высококачественных материалов с вниманием к деталям.</p>
                     <ul>
-                        <li>Тест характеристика 1</li>
-                        <li>Тест характеристика 2</li>
-                        <li>Тест характеристика 3</li>
+                        <li>Премиальные материалы</li>
+                        <li>Эксклюзивный дизайн</li>
+                        <li>Долговечность и надежность</li>
+                        <li>Легкость в уходе</li>
                     </ul>
                 </div>
-                <button class="btn btn-primary btn-add-to-cart" data-product="${product.id}">Добавить в корзину</button>
+                <div class="modal-product-actions">
+                    <button class="btn btn-primary btn-add-to-cart" data-product="${product.id}">
+                        <i class="fas fa-shopping-cart"></i> Добавить в корзину
+                    </button>
+                    <button class="btn btn-outline btn-wishlist-modal">
+                        <i class="far fa-heart"></i> В избранное
+                    </button>
+                </div>
             </div>
         </div>
     `;
@@ -487,6 +555,20 @@ function showProductModal(productId) {
     addToCartBtn.addEventListener('click', () => {
         addToCart(product.id);
         modal.classList.remove('active');
+    });
+    
+    // Add event listener to modal wishlist button
+    const wishlistBtn = modalBody.querySelector('.btn-wishlist-modal');
+    wishlistBtn.addEventListener('click', () => {
+        wishlistBtn.querySelector('i').classList.toggle('far');
+        wishlistBtn.querySelector('i').classList.toggle('fas');
+        
+        if (wishlistBtn.querySelector('i').classList.contains('fas')) {
+            wishlistBtn.style.color = '#d4af37';
+            showNotification('Товар добавлен в избранное');
+        } else {
+            wishlistBtn.style.color = '';
+        }
     });
     
     modal.classList.add('active');
@@ -503,19 +585,55 @@ function initializeMobileMenu() {
     });
 }
 
-// Consultation form functionality
-function initializeConsultationForm() {
-    const consultationForm = document.getElementById('consultationForm');
+// Utility functions
+function formatPrice(price) {
+    return new Intl.NumberFormat('ru-RU').format(price) + ' ₽';
+}
+
+function showNotification(message, type = 'success') {
+    // Remove existing notification
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
     
-    consultationForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(consultationForm);
-        const name = consultationForm.querySelector('input[type="text"]').value;
-        const phone = consultationForm.querySelector('input[type="tel"]').value;
-        
-        // Simulate form submission
-        alert(`Спасибо, ${name}! Мы свяжемся с вами по номеру ${phone} в ближайшее время.`);
-        consultationForm.reset();
-    });
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    // Hide notification after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Get active products function for external use
+function getActiveProducts() {
+    let products = [];
+    
+    try {
+        products = JSON.parse(localStorage.getItem('products')) || [];
+    } catch (error) {
+        console.error('Load products error:', error);
+        products = [];
+    }
+    
+    return products.filter(product => product.active === true);
 }
