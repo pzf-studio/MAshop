@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор коммерческих предложений | PZF-Studio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="fast.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <!-- Шапка -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Конструктор КП</div>
+                <nav class="nav-menu">
+                    <a href="#" class="nav-link">Главная</a>
+                    <a href="#" class="nav-link">Шаблоны</a>
+                    <a href="#" class="nav-link">Примеры</a>
+                    <a href="#" class="nav-link">Помощь</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="container">
+        <h1 class="page-title">Создайте свое коммерческое предложение</h1>
+        
+        <div class="proposal-builder">
+            <!-- Таблица цен -->
+            <section>
+                <h2 class="section-title">Таблица цен</h2>
+                <button class="add-row-btn" id="add-price-row">
+                    <i class="fas fa-plus"></i> Добавить строку
+                </button>
+                <table class="price-table" id="price-table">
+                    <thead>
+                        <tr>
+                            <th width="70%">Услуга / Описание</th>
+                            <th width="30%">Цена</th>
+                        </tr>
+                    </thead>
+                    <tbody id="price-table-body">
+                        <tr>
+                            <td><input type="text" placeholder="Введите описание услуги"></td>
+                            <td><input type="text" placeholder="Введите цену"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" placeholder="Введите описание услуги"></td>
+                            <td><input type="text" placeholder="Введите цену"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+            <!-- Топики -->
+            <section>
+                <h2 class="section-title">Информационные блоки</h2>
+                <div class="topics-container" id="topics-container">
+                    <div class="topic">
+                        <div class="topic-header">
+                            <div class="topic-title-wrapper">
+                                <h3 class="topic-title">О нашей компании</h3>
+                                <input type="text" class="topic-title-input" value="О нашей компании">
+                            </div>
+                            <div class="topic-actions">
+                                <button class="topic-btn edit" title="Редактировать название">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="topic-btn delete" title="Удалить блок">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="topic-content">
+                            <textarea placeholder="Введите текст для этого блока..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="topic">
+                        <div class="topic-header">
+                            <div class="topic-title-wrapper">
+                                <h3 class="topic-title">Преимущества сотрудничества</h3>
+                                <input type="text" class="topic-title-input" value="Преимущества сотрудничества">
+                            </div>
+                            <div class="topic-actions">
+                                <button class="topic-btn edit" title="Редактировать название">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="topic-btn delete" title="Удалить блок">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="topic-content">
+                            <textarea placeholder="Введите текст для этого блока..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="add-topic-btn" id="add-topic-btn">
+                    <i class="fas fa-plus"></i> Добавить информационный блок
+                </button>
+            </section>
+            
+            <!-- Действия -->
+            <div class="actions">
+                <button class="action-btn preview-btn" id="preview-btn">
+                    <i class="fas fa-eye"></i> Предпросмотр
+                </button>
+                <button class="action-btn download-btn" id="download-btn">
+                    <i class="fas fa-download"></i> Скачать PDF
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно предпросмотра -->
+    <div class="modal" id="preview-modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-modal">&times;</span>
+            <div class="preview-content" id="preview-content">
+                <!-- Содержимое предпросмотра будет генерироваться здесь -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Подвал -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Конструктор КП</h3>
+                    <p>Простой инструмент для создания профессиональных коммерческих предложений</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Контакты</h3>
+                    <p>Email: info@pzf-studio.ru</p>
+                    <p>Телефон: +7 (XXX) XXX-XX-XX</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 PZF-Studio. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="fast.js"></script>
+</body>
+</html>
