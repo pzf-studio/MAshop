@@ -4,196 +4,186 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ma.furniture - Роскошная мебель на заказ</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css?v=2">
-    <script src="index.js"></script>
-    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/palatino">
-    <noscript><link rel="stylesheet" href="https://fonts.cdnfonts.com/css/palatino"></noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js" defer></script>
 </head>
 <body>
-    <div class="static-logo">
-        <a href="" class="logo fade-in">ma furniture</a>
-    </div>
+    <header id="main-header">
+        <div class="header-expanded">
+            <div class="container">
+                <div class="header-content">
+                    <div class="header-logo">
+                        <span class="logo-text">MA FURNITURE</span>
+                    </div>
+                    <nav class="header-nav">
+                        <ul>
+                            <li><a href="#hero">Главная</a></li>
+                            <li><a href="#about">О компании</a></li>
+                            <li><a href="shop.html">Магазин</a></li>
+                            <li><a href="#faq">FAQ</a></li>
+                        </ul>
+                    </nav>
+                    <a href="shop.html" class="btn btn-header">
+                        <i class="fab fa-telegram-plane"></i>
+                        Магазин
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
     
-    <div class="container">
-        <header id="main-header">
-            <div class="header-initial" style="display: none;">
-                <a href="" class="logo fade-in">ma furniture</a>
-            </div>
-            <div class="header-expanded">
-                <div class="container">
-                    <div class="header-content">
-                        <div class="header-logo">
-                            <span class="logo-text">MA Furniture</span>
-                        </div>
-                        <nav class="header-nav">
-                            <ul>
-                                <li><a href="">О компании</a></li>
-                                <li><a href="">Каталог</a></li>
-                                <li><a href="">Отзывы</a></li>
-                                <li><a href="">FAQ</a></li>
-                                <li><a href="">Контакты</a></li>
-                            </ul>
-                        </nav>
-                        <a href="" class="btn btn-header">Оставить заявку</a>
-                    </div>
+    <!-- Обновленная Hero секция -->
+    <section class="hero-section" id="hero">
+        <div class="hero-background">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Эксклюзивная мебель <span>ручной работы</span></h1>
+                <p class="hero-subtitle">Превращаем ваши пространства в произведения искусства с итальянским дизайном и немецкой точностью</p>
+                <div class="hero-buttons">
+                    <a href="shop.html" class="btn btn-secondary">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Перейти в магазин</span>
+                    </a>
                 </div>
             </div>
-        </header>
-        
-        <div class="main-content">
-            <section class="about-section" id="about">
-                <h2 class="section-title fade-in">MA.FURNITURE — ЭКСКЛЮЗИВНАЯ МЕБЕЛЬ РУЧНОЙ РАБОТЫ</h2>
-                
-                <div class="about-content fade-in">
-                    <p>Превращаем ваши пространства в произведения искусства. Каждое изделие — это синтез итальянского дизайна, немецкой точности и русской души.</p>
-                    
-                    <p>Наши преимущества:</p>
-                    <ul>
-                        <li><strong>Индивидуальный подход</strong> — помогаем на каждом этапе</li>
-                        <li><strong>Элитные материалы</strong> — используем самые надежные и лучшие материалы на рынке</li>
-                        <li><strong>Авторские решения</strong> — эксклюзивные механизмы и инновационные технологии</li>
-                        <li><strong>Полный цикл производства</strong> — от чертежей и визуализации, до установки в Вашем интерьере</li>
-                    </ul>
-                </div>
-                
-                <div class="about-features">
-                    <div class="feature-item fade-in">
-                        <h3>5 лет</h3>
-                        <p>Гарантия от фабрики производителя </p>
+        </div>
+        <div class="scroll-indicator">
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- Новая секция предварительного просмотра магазина -->
+    <section class="shop-preview" id="shop-preview">
+        <div class="container">
+            <h2 class="section-title">Популярные товары</h2>
+            <div class="shop-grid">
+                <div class="shop-card">
+                    <div class="shop-card-image">
+                        <i class="fas fa-tshirt" style="font-size: 3rem;"></i>
                     </div>
-                    
-                    <div class="feature-item fade-in delay-1">
-                        <h3>100%</h3>
-                        <p>Качественные материалы</p>
-                    </div>
-                    
-                    <div class="feature-item fade-in delay-2">
-                        <h3>24/7</h3>
-                        <p>Поддержка клиентов</p>
+                    <div class="shop-card-content">
+                        <h3>Гардеробные</h3>
+                        <p>Электрический пантограф премиум-класса с сенсорным управлением</p>
+                        
+                        
                     </div>
                 </div>
-            </section>
+                
+                <div class="shop-card">
+                    <div class="shop-card-image">
+                        <i class="fas fa-archive" style="font-size: 3rem;"></i>
+                    </div>
+                    <div class="shop-card-content">
+                        <h3>Кухни</h3>
+                        <p>Комплексное решение для организации пространства вашего гардероба</p>
+                        
+                        
+                    </div>
+                </div>
+                
+                <div class="shop-card">
+                    <div class="shop-card-image">
+                        <i class="fas fa-couch" style="font-size: 3rem;"></i>
+                    </div>
+                    <div class="shop-card-content">
+                        <h3>Гостинные</h3>
+                        <p>Эксклюзивный мебельный гарнитур из натурального дерева</p>
+                    
+                    </div>
+                </div>
+            </div>
             
-        <div class="divider"></div>
-
-        <section class="pantograph-section" id="pantograph">
-            <h2 class="section-title fade-in">ЭЛЕКТРИЧЕСКИЙ ПАНТОГРАФ DELUXE</h2>
+            <div style="text-align: center; margin-top: 3rem;">
+                <a href="shop.html" class="btn btn-secondary" style="padding: 15px 40px;">
+                    <i class="fas fa-store"></i>
+                    Перейти в полный каталог
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <div class="main-content">
+        <section class="about-section" id="about">
+            <h2 class="section-title">MA.FURNITURE — ЭКСКЛЮЗИВНАЯ МЕБЕЛЬ РУЧНОЙ РАБОТЫ</h2>
             
-            <div class="product-description fade-in">
-                <p>Роскошное решение для вашего гардероба. Пантограф Deluxe сочетает в себе инновационные технологии и премиальные материалы, создавая непревзойденный комфорт и стиль.</p>
+            <div class="about-content">
+                <p>Превращаем ваши пространства в произведения искусства. Каждое изделие — это синтез итальянского дизайна, немецкой точности и русской души.</p>
                 
-                <div class="pantograph-features fade-in">
-                    <div class="features-row">
-                        <div class="pantograph-card">
-                            <h3>Характеристики</h3>
-                            <ul>
-                                <li><strong>Ширина:</strong> 600-1200 мм</li>
-                                <li><strong>Вынос из шкафа:</strong> 650 мм</li>
-                                <li><strong>Высота:</strong> 815 мм</li>
-                                <li><strong>Цвета:</strong> Olive, Orange, Gray, White, Black</li>
-                            </ul>
-                        </div>
-
-                        <div class="pantograph-card">
-                            <h3>Функционал</h3>
-                            <ul>
-                                <li><strong>Управление:</strong> Сенсорная панель</li>
-                                <li><strong>Механизм:</strong> Автоматический, бесшумный</li>
-                                <li><strong>Нагрузка:</strong> до 20 кг</li>
-                                <li><strong>Материалы:</strong> премиальные</li>
-                            </ul>
-                        </div>
+                <p>Наши преимущества:</p>
+                <ul>
+                    <li><strong>Индивидуальный подход</strong> — помогаем на каждом этапе</li>
+                    <li><strong>Элитные материалы</strong> — используем самые надежные и лучшие материалы на рынке</li>
+                    <li><strong>Авторские решения</strong> — эксклюзивные механизмы и инновационные технологии</li>
+                    <li><strong>Полный цикл производства</strong> — от чертежей и визуализации, до установки в Вашем интерьере</li>
+                </ul>
+            </div>
+            
+            <div class="about-features">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-award"></i>
                     </div>
+                    <h3>5 лет</h3>
+                    <p>Гарантия от фабрики производителя</p>
                 </div>
                 
-                <p class="product-conclusion fade-in delay-2">Электрический пантограф — это идеальное сочетание функциональности и элегантности, которое преобразит ваше пространство!</p>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <h3>100%</h3>
+                    <p>Качественные материалы</p>
+                </div>
                 
-                <div class="product-gallery fade-in">
-                    <div class="gallery-row">
-                        <div class="gallery-item fade-in">
-                            <div class="image-placeholder">Белый пантограф 1</div>
-                        </div>
-                        <div class="gallery-item fade-in delay-1">
-                            <div class="image-placeholder">Белый пантограф 2</div>
-                        </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
                     </div>
-                    <div class="gallery-row">
-                        <div class="gallery-item fade-in">
-                            <div class="image-placeholder">Чёрный пантограф 1</div>
-                        </div>
-                        <div class="gallery-item fade-in delay-1">
-                            <div class="image-placeholder">Чёрный пантограф 2</div>
-                        </div>
-                    </div>
-
-                    <div class="all-colors-btn-container">
-                        <a href="https://t.me/Ma_Furniture_ru" class="btn btn-all-colors">
-                            <span class="btn-text">Все цвета</span>
-                            <span class="btn-icon">→</span>
-                        </a>
-                    </div>
+                    <h3>24/7</h3>
+                    <p>Поддержка клиентов</p>
                 </div>
             </div>
         </section>
-
+        
         <div class="divider"></div>
 
-        <section class="pantograph-section">
-            <h2 class="section-title fade-in">ЭЛЕКТРИЧЕСКИЙ ПАНТОГРАФ BASIC</h2>
-            
-            <div class="product-description fade-in">
-                <p>Надежное и простое решение для вашего гардероба. Пантограф Basic сочетает в себе функциональность и доступность, идеально подходя для повседневного использования.</p>
+        <!-- Обновленная секция - Мини-превью магазина -->
+        <section class="shop-mini-preview" id="shop-mini-preview">
+            <div class="container">
+                <h2 class="section-title">ЭКСКЛЮЗИВНЫЕ ТОВАРЫ</h2>
+                <p class="section-subtitle">Случайная подборка из нашего каталога премиальной мебели</p>
                 
-                <div class="pantograph-features fade-in">
-                    <div class="features-row">
-                        <div class="pantograph-card">
-                            <h3>Характеристики</h3>
-                            <ul>
-                                <li><strong>Ширина:</strong> 600-1200 мм</li>
-                                <li><strong>Вынос из шкафа:</strong> 650 мм</li>
-                                <li><strong>Высота:</strong> 815 мм</li>
-                                <li><strong>Цвета:</strong> Deep Gray, Gunmetal gray, Champagne gold, White, Black</li>
-                            </ul>
-                        </div>
-
-                        <div class="pantograph-card">
-                            <h3>Функционал</h3>
-                            <ul>
-                                <li><strong>Управление:</strong> Сенсорная панель</li>
-                                <li><strong>Механизм:</strong> Автоматический, бесшумный</li>
-                                <li><strong>Нагрузка:</strong> до 20 кг</li>
-                                <li><strong>Материалы:</strong> премиальные</li>
-                            </ul>
-                        </div>
-                    </div>
+                <div class="random-products-grid" id="randomProductsGrid">
+                    <!-- Случайные товары будут загружены через JavaScript -->
                 </div>
                 
-                <p class="product-conclusion fade-in delay-2">Пантограф Basic — это практичное решение для тех, кто ценит надежность и простоту!</p>
+                <div class="mini-preview-actions">
+                    <a href="shop.html" class="btn btn-primary">
+                        <i class="fas fa-store"></i>
+                        Смотреть весь каталог
+                    </a>
+                    <a href="https://t.me/Ma_Furniture_ru" class="btn btn-secondary">
+                        <i class="fab fa-telegram-plane"></i>
+                        Получить консультацию
+                    </a>
+                </div>
                 
-                <div class="product-gallery fade-in">
-                    <div class="gallery-row">
-                        <div class="gallery-item fade-in">
-                            <div class="image-placeholder">Basic пантограф 1</div>
-                        </div>
-                        <div class="gallery-item fade-in delay-1">
-                            <div class="image-placeholder">Basic пантограф 2</div>
-                        </div>
+                <div class="preview-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">45+</div>
+                        <div class="stat-label">Эксклюзивных моделей</div>
                     </div>
-                    <div class="gallery-row">
-                        <div class="gallery-item fade-in delay-2">
-                            <div class="image-placeholder">Basic пантограф 3</div>
-                        </div>
-                        <div class="gallery-item fade-in delay-1">
-                            <div class="image-placeholder">Basic пантограф 4</div>
-                        </div>
+                    <div class="stat-item">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Качественные материалы</div>
                     </div>
-                    
-                    <div class="all-colors-btn-container">
-                        <a href="https://t.me/Ma_Furniture_ru" class="btn btn-all-colors">
-                            <span class="btn-text">Все цвета</span>
-                            <span class="btn-icon">→</span>
-                        </a>
+                    <div class="stat-item">
+                        <div class="stat-number">5 лет</div>
+                        <div class="stat-label">Гарантия</div>
                     </div>
                 </div>
             </div>
@@ -202,85 +192,103 @@
         <div class="divider"></div>
 
         <section class="catalog-cta">
-            <div class="luxury-catalog-box fade-in">
+            <div class="luxury-catalog-box">
                 <h3>ЭЛИТНЫЕ ПАНТОГРАФЫ — СОВЕРШЕНСТВО ДЛЯ ВАШЕГО ГАРДЕРОБА</h3>
                 <div class="divider-gold"></div>
                 <p class="luxury-text">
                     Эксклюзивные системы хранения премиум-класса с бесшумным ходом и безупречной надежностью. 
                     Итальянские механизмы, немецкая сталь и ручная сборка мастеров — в нашем каталоге Telegram.
                 </p>
-                <button class="btn btn-luxury-catalog">
+                <a href="https://t.me/Ma_Furniture_ru" class="btn btn-luxury-catalog">
                     <span class="btn-text">СМОТРЕТЬ КАТАЛОГ В TELEGRAM</span>
-                    <span class="btn-icon">→</span>
-                </button>
+                    <span class="btn-icon"><i class="fab fa-telegram-plane"></i></span>
+                </a>
             </div>
         </section>
 
         <section id="faq">
-            <h2 class="section-title fade-in delay-1">ЧАСТО ЗАДАВАЕМЫЕ ВОПРОСЫ</h2>
+            <h2 class="section-title">ЧАСТО ЗАДАВАЕМЫЕ ВОПРОСЫ</h2>
             
             <div class="faq-container">
-                <div class="faq-item fade-in">
-                    <button class="faq-question" aria-expanded="false">
+                <div class="faq-item">
+                    <button class="faq-question">
                         <span class="question-text">Сколько времени занимает изготовление?</span>
-                        <span class="faq-toggle">
-                            <span class="toggle-icon">+</span>
-                        </span>
+                        <span class="faq-toggle"><i class="fas fa-plus"></i></span>
                     </button>
                     <div class="faq-answer">
                         <p>Итоговые сроки зависят напрямую от Вашего заказа. Стандартный срок изготовления на фабрике занимает от 2-4 недель</p>
                     </div>
                 </div>
                 
-                <div class="faq-item fade-in">
-                    <button class="faq-question" aria-expanded="false">
+                <div class="faq-item">
+                    <button class="faq-question">
                         <span class="question-text">Сколько времени занимает доставка после изготовления?</span>
-                        <span class="faq-toggle">
-                            <span class="toggle-icon">+</span>
-                        </span>
+                        <span class="faq-toggle"><i class="fas fa-plus"></i></span>
                     </button>
                     <div class="faq-answer">
                         <p>Срок доставки составляет 14-20 дней до распределительного пункта в г. Москва, дальнейшая отправка возможна любой транспортной компанией на выбор клиента до конечного адреса</p>
                     </div>
                 </div>
                 
-                <div class="faq-item fade-in">
-                    <button class="faq-question" aria-expanded="false">
+                <div class="faq-item">
+                    <button class="faq-question">
                         <span class="question-text">Дизайны окончательные, или есть возможность доработки внешнего вида?</span>
-                        <span class="faq-toggle">
-                            <span class="toggle-icon">+</span>
-                        </span>
+                        <span class="faq-toggle"><i class="fas fa-plus"></i></span>
                     </button>
                     <div class="faq-answer">
                         <p>Все наши товары могут быть кастомизированы под нужды Вашего интерьера, любые вопросы можно задать нашему менеджеру, работаем и помогаем клиентам 24/7</p>
                     </div>
                 </div>
-                
-                <div class="faq-item fade-in">
-                    <button class="faq-question" aria-expanded="false">
-                        <span class="question-text">Возможна ли помощь в установке наших продуктов?</span>
-                        <span class="faq-toggle">
-                            <span class="toggle-icon">+</span>
-                        </span>
-                    </button>
-                    <div class="faq-answer">
-                        <p>Да, при необходимости наши специалисты помогут в установке и расскажут как работают наши технологии</p>
-                    </div>
-                </div>
-                
-                <div class="faq-item fade-in">
-                    <button class="faq-question" aria-expanded="false">
-                        <span class="question-text">Как оформить заказ?</span>
-                        <span class="faq-toggle">
-                            <span class="toggle-icon">+</span>
-                        </span>
-                    </button>
-                    <div class="faq-answer">
-                        <p>Для оформления заказа можно оставить заявку на сайте, после чего в выбранном мессенджере с Вами свяжется наш менеджер</p>
-                    </div>
-                </div>
             </div>
         </section>
     </div>
+    
+    <!-- Новый футер -->
+    <!-- Замените существующий footer на этот -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>MA Furniture</h3>
+                    <p>Эксклюзивная мебель ручной работы с итальянским дизайном и немецкой точностью.</p>
+                    <div class="social-links">
+                        <a href="https://t.me/Ma_Furniture_ru" aria-label="Telegram">
+                            <i class="fab fa-telegram-plane"></i>
+                        </a>
+                        <a href="#" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" aria-label="WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Навигация</h4>
+                    <ul>
+                        <li><a href="#hero">Главная</a></li>
+                        <li><a href="#about">О компании</a></li>
+                        <li><a href="shop.html">Магазин</a></li>
+                        <li><a href="#shop-mini-preview">Каталог</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> +7 (XXX) XXX-XX-XX</li>
+                        <li><i class="fas fa-envelope"></i> info@mafurniture.ru</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Москва, Россия</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 MA Furniture. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

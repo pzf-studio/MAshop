@@ -6,45 +6,20 @@
     <title>Админ-панель - MA Furniture</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
     <link rel="stylesheet" href="shop.css">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <a href="index.html">
-                        <span class="logo-text">MA FURNITURE</span>
-                        <span class="logo-subtitle">Админ-панель</span>
-                    </a>
-                </div>
-                
-                <nav class="main-nav">
-                    <ul>
-                        <li><a href="shop.html">Магазин</a></li>
-                        <li><a href="admin.html">Админ-панель</a></li>
-                        <li><a href="#" id="logoutBtn">Выйти</a></li>
-                    </ul>
-                </nav>
-                
-                <div class="header-actions">
-                    <button class="menu-toggle" id="menuToggle">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
 
     <!-- Main Content -->
     <main class="main-container">
         <div class="container">
             <div class="admin-panel">
                 <div class="admin-header">
-                    <h1 class="admin-title">Управление товарами</h1>
+                    <div>
+                        <h1 class="admin-title">Управление товарами</h1>
+                        <small id="productCounter">Товаров: 0/35</small>
+                    </div>
                     <div class="admin-actions">
                         <button class="btn btn-primary" id="addProductBtn">
                             <i class="fas fa-plus"></i> Добавить товар
@@ -73,6 +48,7 @@
                                     <th>Категория</th>
                                     <th>Цена</th>
                                     <th>Бейдж</th>
+                                    <th>Статус</th>
                                     <th>Действия</th>
                                 </tr>
                             </thead>
@@ -113,50 +89,98 @@
             <div class="modal-body">
                 <h2 id="modalTitle">Добавить товар</h2>
                 <form class="product-form" id="productForm">
-                    <input type="hidden" id="productId">
-                    
-                    <div class="form-group">
-                        <label for="productName">Название товара *</label>
-                        <input type="text" id="productName" required>
-                    </div>
-                    
-                    <div class="form-row">
+                        <input type="hidden" id="productId">
+                        
                         <div class="form-group">
-                            <label for="productPrice">Цена (₽) *</label>
-                            <input type="number" id="productPrice" min="0" required>
+                            <label for="productName">Название товара *</label>
+                            <input type="text" id="productName" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productPrice">Цена (₽) *</label>
+                                <input type="number" id="productPrice" min="0" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="productCategory">Категория *</label>
+                                <select id="productCategory" required>
+                                    <option value="">Выберите категорию</option>
+                                    <option value="pantograph">Пантографы</option>
+                                    <option value="wardrobe">Гардеробные системы</option>
+                                    <option value="premium">Премиум коллекция</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productSku">Артикул</label>
+                                <input type="text" id="productSku">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="productStock">Количество на складе</label>
+                                <input type="number" id="productStock" min="0" value="0">
+                            </div>
                         </div>
                         
                         <div class="form-group">
-                            <label for="productCategory">Категория *</label>
-                            <select id="productCategory" required>
-                                <option value="">Выберите категорию</option>
-                                <option value="pantograph">Пантографы</option>
-                                <option value="wardrobe">Гардеробные системы</option>
-                                <option value="premium">Премиум коллекция</option>
-                            </select>
+                            <label>Бейдж</label>
+                            <div class="badge-selector">
+                                <div class="badge-option" data-badge="">Без бейджа</div>
+                                <div class="badge-option" data-badge="Хит продаж">Хит продаж</div>
+                                <div class="badge-option" data-badge="Новинка">Новинка</div>
+                            </div>
+                            <input type="hidden" id="productBadge" value="">
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Бейдж</label>
-                        <div class="badge-selector">
-                            <div class="badge-option" data-badge="">Без бейджа</div>
-                            <div class="badge-option" data-badge="Хит продаж">Хит продаж</div>
-                            <div class="badge-option" data-badge="Новинка">Новинка</div>
+                        <div class="form-group">
+                            <label for="productFeatures">Особенности (каждая с новой строки)</label>
+                            <textarea id="productFeatures" rows="3" placeholder="Высококачественные материалы&#10;Эксклюзивный дизайн&#10;Прочная конструкция"></textarea>
                         </div>
-                        <input type="hidden" id="productBadge" value="">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="productDescription">Описание</label>
-                        <textarea id="productDescription" rows="4" placeholder="Описание товара..."></textarea>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-cancel" id="cancelBtn">Отмена</button>
-                        <button type="submit" class="btn btn-primary">Сохранить товар</button>
-                    </div>
+
+                        <div class="form-group">
+                            <label for="productSpecifications">Характеристики (в формате "Ключ: значение")</label>
+                            <textarea id="productSpecifications" rows="4" placeholder="Материал: Массив дерева&#10;Размеры: 200x90x45 см&#10;Вес: 35 кг&#10;Цвет: Натуральное дерево"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="productDescription">Описание</label>
+                            <textarea id="productDescription" rows="4" placeholder="Описание товара..."></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productActive">
+                                    <input type="checkbox" id="productActive" checked> Активный товар
+                                </label>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="productFeatured">
+                                    <input type="checkbox" id="productFeatured"> Рекомендуемый товар
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productImages">Фотографии товара</label>
+                            <div class="image-upload-container">
+                                <div class="image-preview" id="imagePreview">
+                                    <!-- Препросмотр изображений будет здесь -->
+                                </div>
+                                <input type="file" id="productImages" multiple accept="image/*" style="display: none;">
+                                <button type="button" class="btn btn-outline" id="uploadImagesBtn">
+                                    <i class="fas fa-upload"></i> Загрузить фото
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-cancel" id="cancelBtn">Отмена</button>
+                            <button type="submit" class="btn btn-primary">Сохранить товар</button>
+                        </div>
                 </form>
+                
             </div>
         </div>
     </div>

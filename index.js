@@ -1,228 +1,28 @@
-let scrollTimeout;
-let resizeTimeout;
+// Дополнения к существующему JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
-    
-    document.querySelectorAll('a[href^="#"], a[href^="index.html#"]').forEach(anchor => {
+    // Плавная прокрутка для якорных ссылок
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             e.preventDefault();
             
-            const href = this.getAttribute('href');
-            let targetId;
-            
-            // Обрабатываем обе формы ссылок: #anchor и index.html#anchor
-            if (href.includes('#')) {
-                targetId = href.split('#')[1];
-            } else {
-                targetId = href;
-            }
-            
+            const targetId = this.getAttribute('href').substring(1);
             const targetElement = document.getElementById(targetId);
             
             if (targetElement) {
-                // Если мы на странице заказа, переходим на главную
-                if (window.location.pathname.includes('order.html') && href.includes('index.html')) {
-                    window.location.href = href;
-                    return;
-                }
-                
-                // Плавная прокрутка
                 targetElement.scrollIntoView({
                     behavior: 'smooth',
                     block: 'start'
                 });
-                
-                // Обновляем URL без перезагрузки страницы
-                history.pushState(null, null, '#' + targetId);
             }
         });
     });
-    const fadeElements = document.querySelectorAll('.fade-in');
     
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = 1;
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, {
-        threshold: 0.1
-    });
-    
-    fadeElements.forEach(element => {
-        element.style.opacity = 0;
-        element.style.transform = 'translateY(20px)';
-        element.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-        observer.observe(element);
-    });
-    
-    const btn = document.querySelector('.btn');
-    if (btn) {
-        btn.addEventListener('mouseover', function() {
-            this.style.transform = 'translateY(-5px) scale(1.05)';
-        });
-        
-        btn.addEventListener('mouseout', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    }
-    
-    
-    const faqItems = document.querySelectorAll('.faq-accordion .faq-item');
-    
-    faqItems.forEach(item => {
-        const question = item.querySelector('.faq-question');
-        
-        question.addEventListener('click', () => {
-            faqItems.forEach(otherItem => {
-                if (otherItem !== item && otherItem.classList.contains('active')) {
-                    otherItem.classList.remove('active');
-                }
-            });
-            
-            item.classList.toggle('active');
-        });
-    });
-    
-    const orderMenu = document.querySelector('.order-menu');
-    const orderToggle = document.querySelector('.order-toggle');
-    
-    if (orderToggle) {
-        orderToggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            orderMenu.classList.toggle('active');
-        });
-        
-        document.addEventListener('click', function(e) {
-            if (!orderMenu.contains(e.target)) {
-                orderMenu.classList.remove('active');
-            }
-        });
-        
-        document.querySelector('.order-dropdown')?.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    }
-    
-    const header = document.getElementById('main-header');
-    const scrollThreshold = 100;
-    
-    if (header) {
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > scrollThreshold) {
-                header.classList.add('header-scrolled');
-                // Скрыть статичный логотип при скролле
-                document.querySelector('.static-logo').style.opacity = '0';
-            } else {
-                header.classList.remove('header-scrolled');
-                // Показать статичный логотип
-                document.querySelector('.static-logo').style.opacity = '1';
-            }
-        });
-        
-        if (window.scrollY > scrollThreshold) {
-            header.classList.add('header-scrolled');
-            document.querySelector('.static-logo').style.opacity = '0';
-        }
-    }
-});
-
-function initReviews() {
-    const reviewsTrack = document.querySelector('.reviews-track');
-    const reviewCards = document.querySelectorAll('.review-card');
-    const prevBtn = document.querySelector('.prev-btn');
-    const nextBtn = document.querySelector('.next-btn');
-    const indicators = document.querySelectorAll('.indicator');
-    const currentReviewEl = document.querySelector('.current-review');
-    const totalReviewsEl = document.querySelector('.total-reviews');
-    
-    if (!reviewsTrack || reviewCards.length === 0) return;
-    
-    let currentIndex = 0;
-    const totalReviews = reviewCards.length;
-    
-    // Установка общего количества отзывов
-    totalReviewsEl.textContent = totalReviews;
-    
-    // Функция обновления отображения отзывов
-    function updateReviewDisplay() {
-        reviewCards.forEach((card, index) => {
-            card.classList.remove('active');
-            if (index === currentIndex) {
-                card.classList.add('active');
-            }
-        });
-        
-        // Обновление индикаторов
-        indicators.forEach((indicator, index) => {
-            indicator.classList.remove('active');
-            if (index === currentIndex) {
-                indicator.classList.add('active');
-            }
-        });
-        
-        // Обновление нумерации
-        currentReviewEl.textContent = currentIndex + 1;
-    }
-    
-    // Переход к следующему отзыву
-    function nextReview() {
-        currentIndex = (currentIndex + 1) % totalReviews;
-        updateReviewDisplay();
-    }
-    
-    // Переход к предыдущему отзыву
-    function prevReview() {
-        currentIndex = (currentIndex - 1 + totalReviews) % totalReviews;
-        updateReviewDisplay();
-    }
-    
-    // Обработчики событий для кнопок навигации
-    if (nextBtn) nextBtn.addEventListener('click', nextReview);
-    if (prevBtn) prevBtn.addEventListener('click', prevReview);
-    
-    // Обработчики для индикаторов
-    indicators.forEach((indicator, index) => {
-        indicator.addEventListener('click', () => {
-            currentIndex = index;
-            updateReviewDisplay();
-        });
-    });
-    
-    // Автопрокрутка отзывов (опционально)
-    let autoPlayInterval;
-    
-    function startAutoPlay() {
-        autoPlayInterval = setInterval(nextReview, 5000);
-    }
-    
-    function stopAutoPlay() {
-        clearInterval(autoPlayInterval);
-    }
-    
-    // Запуск автопрокрутки
-    startAutoPlay();
-    
-    // Остановка автопрокрутки при наведении на отзывы
-    reviewsTrack.addEventListener('mouseenter', stopAutoPlay);
-    reviewsTrack.addEventListener('mouseleave', startAutoPlay);
-    
-    // Инициализация
-    updateReviewDisplay();
-}
-
-// Вызов функции инициализации при загрузке DOM
-document.addEventListener('DOMContentLoaded', function() {
-    initReviews();
-});
-
-function initFAQ() {
+    // FAQ аккордеон
     const faqItems = document.querySelectorAll('.faq-item');
     
     faqItems.forEach(item => {
         const question = item.querySelector('.faq-question');
-        const answer = item.querySelector('.faq-answer');
         
         question.addEventListener('click', () => {
             const isActive = item.classList.contains('active');
@@ -230,128 +30,372 @@ function initFAQ() {
             // Закрываем все элементы
             faqItems.forEach(otherItem => {
                 otherItem.classList.remove('active');
-                otherItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
             });
             
             // Открываем текущий, если он был закрыт
             if (!isActive) {
                 item.classList.add('active');
-                question.setAttribute('aria-expanded', 'true');
             }
         });
     });
     
-    // Добавляем обработчики для клавиатуры
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            faqItems.forEach(item => {
-                item.classList.remove('active');
-                item.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+    // Скрытие статичного логотипа при скролле
+    const header = document.getElementById('main-header');
+    const staticLogo = document.querySelector('.static-logo');
+    
+    if (header && staticLogo) {
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 100) {
+                staticLogo.style.opacity = '0';
+            } else {
+                staticLogo.style.opacity = '1';
+            }
+        });
+    }
+    
+    // Галерея товаров
+    const gallerySlides = document.querySelectorAll('.gallery-slide');
+    const galleryDotsContainer = document.querySelector('.gallery-dots');
+    const prevButton = document.querySelector('.gallery-nav.prev');
+    const nextButton = document.querySelector('.gallery-nav.next');
+    
+    let currentSlide = 0;
+    
+    // Создание индикаторов для галереи
+    gallerySlides.forEach((_, index) => {
+        const dot = document.createElement('button');
+        dot.classList.add('gallery-dot');
+        if (index === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => goToSlide(index));
+        galleryDotsContainer.appendChild(dot);
+    });
+    
+    const dots = document.querySelectorAll('.gallery-dot');
+    
+    function goToSlide(index) {
+        gallerySlides[currentSlide].classList.remove('active');
+        dots[currentSlide].classList.remove('active');
+        
+        currentSlide = index;
+        
+        gallerySlides[currentSlide].classList.add('active');
+        dots[currentSlide].classList.add('active');
+    }
+    
+    function nextSlide() {
+        let nextIndex = currentSlide + 1;
+        if (nextIndex >= gallerySlides.length) nextIndex = 0;
+        goToSlide(nextIndex);
+    }
+    
+    function prevSlide() {
+        let prevIndex = currentSlide - 1;
+        if (prevIndex < 0) prevIndex = gallerySlides.length - 1;
+        goToSlide(prevIndex);
+    }
+    
+    if (prevButton && nextButton) {
+        prevButton.addEventListener('click', prevSlide);
+        nextButton.addEventListener('click', nextSlide);
+    }
+    
+    // Автопрокрутка галереи
+    let galleryInterval = setInterval(nextSlide, 5000);
+    
+    // Остановка автопрокрутки при наведении
+    const galleryContainer = document.querySelector('.gallery-container');
+    if (galleryContainer) {
+        galleryContainer.addEventListener('mouseenter', () => {
+            clearInterval(galleryInterval);
+        });
+        
+        galleryContainer.addEventListener('mouseleave', () => {
+            galleryInterval = setInterval(nextSlide, 5000);
+        });
+    }
+    
+    // Анимация появления элементов при скролле
+    const fadeElements = document.querySelectorAll('.fade-in');
+    
+    const fadeInObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    fadeElements.forEach(element => {
+        fadeInObserver.observe(element);
+    });
+    
+    // Анимация для кнопок при наведении
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Плавная прокрутка для якорных ссылок
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const targetId = this.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            
+            if (targetElement) {
+                targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // FAQ аккордеон
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        
+        question.addEventListener('click', () => {
+            const isActive = item.classList.contains('active');
+            
+            // Закрываем все элементы
+            faqItems.forEach(otherItem => {
+                otherItem.classList.remove('active');
             });
-        }
+            
+            // Открываем текущий, если он был закрыт
+            if (!isActive) {
+                item.classList.add('active');
+            }
+        });
+    });
+    
+    // Скрытие статичного логотипа при скролле
+    const header = document.getElementById('main-header');
+    const staticLogo = document.querySelector('.static-logo');
+    
+    if (header && staticLogo) {
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 100) {
+                staticLogo.style.opacity = '0';
+            } else {
+                staticLogo.style.opacity = '1';
+            }
+        });
+    }
+    
+    // Галерея товаров
+    const gallerySlides = document.querySelectorAll('.gallery-slide');
+    const galleryDotsContainer = document.querySelector('.gallery-dots');
+    const prevButton = document.querySelector('.gallery-nav.prev');
+    const nextButton = document.querySelector('.gallery-nav.next');
+    
+    let currentSlide = 0;
+    
+    // Создание индикаторов для галереи
+    gallerySlides.forEach((_, index) => {
+        const dot = document.createElement('button');
+        dot.classList.add('gallery-dot');
+        if (index === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => goToSlide(index));
+        galleryDotsContainer.appendChild(dot);
+    });
+    
+    const dots = document.querySelectorAll('.gallery-dot');
+    
+    function goToSlide(index) {
+        gallerySlides[currentSlide].classList.remove('active');
+        dots[currentSlide].classList.remove('active');
+        
+        currentSlide = index;
+        
+        gallerySlides[currentSlide].classList.add('active');
+        dots[currentSlide].classList.add('active');
+    }
+    
+    function nextSlide() {
+        let nextIndex = currentSlide + 1;
+        if (nextIndex >= gallerySlides.length) nextIndex = 0;
+        goToSlide(nextIndex);
+    }
+    
+    function prevSlide() {
+        let prevIndex = currentSlide - 1;
+        if (prevIndex < 0) prevIndex = gallerySlides.length - 1;
+        goToSlide(prevIndex);
+    }
+    
+    if (prevButton && nextButton) {
+        prevButton.addEventListener('click', prevSlide);
+        nextButton.addEventListener('click', nextSlide);
+    }
+    
+    // Автопрокрутка галереи
+    let galleryInterval = setInterval(nextSlide, 5000);
+    
+    // Остановка автопрокрутки при наведении
+    const galleryContainer = document.querySelector('.gallery-container');
+    if (galleryContainer) {
+        galleryContainer.addEventListener('mouseenter', () => {
+            clearInterval(galleryInterval);
+        });
+        
+        galleryContainer.addEventListener('mouseleave', () => {
+            galleryInterval = setInterval(nextSlide, 5000);
+        });
+    }
+    
+    // Анимация появления элементов при скролле
+    const fadeElements = document.querySelectorAll('.fade-in');
+    
+    const fadeInObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    fadeElements.forEach(element => {
+        fadeInObserver.observe(element);
+    });
+    
+    // Анимация для кнопок при наведении
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Загрузка случайных товаров для мини-превью
+    loadRandomProducts();
+});
+
+// Функция для загрузки случайных товаров
+function loadRandomProducts() {
+    const productsGrid = document.getElementById('randomProductsGrid');
+    if (!productsGrid) return;
+
+    // Получаем активные товары из localStorage
+    const activeProducts = getActiveProducts();
+    
+    // Если нет товаров, показываем заглушку
+    if (activeProducts.length === 0) {
+        productsGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #666;">
+                <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <h3>Товары скоро появятся</h3>
+                <p>Наши эксклюзивные коллекции готовятся к показу</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Выбираем 3 случайных товара
+    const randomProducts = getRandomProducts(activeProducts, 3);
+    
+    // Очищаем контейнер
+    productsGrid.innerHTML = '';
+    
+    // Создаем карточки для каждого случайного товара
+    randomProducts.forEach(product => {
+        const productCard = createRandomProductCard(product);
+        productsGrid.appendChild(productCard);
     });
 }
 
-// Инициализация при загрузке DOM
-document.addEventListener('DOMContentLoaded', function() {
-    initFAQ();
-});
-
-function initCookieBanner() {
-    const cookieBanner = document.getElementById('cookieBanner');
-    if (cookieBanner) {
-        // Проверяем, было ли уже принято решение по cookies
-        const cookiesAccepted = localStorage.getItem('cookiesAccepted');
-        const cookiesRejected = localStorage.getItem('cookiesRejected');
-
-        if (!cookiesAccepted && !cookiesRejected) {
-            // Показываем баннер только если решение еще не принято
-            setTimeout(() => {
-                cookieBanner.classList.add('active');
-            }, 2000); // Появляется через 2 секунды после загрузки страницы
-        }
-
-        const acceptCookies = document.getElementById('acceptCookies');
-        const rejectCookies = document.getElementById('rejectCookies');
-        const cookieSettings = document.getElementById('cookieSettings');
-
-        // Обработчик принятия cookies
-        acceptCookies.addEventListener('click', () => {
-            localStorage.setItem('cookiesAccepted', 'true');
-            localStorage.setItem('cookiesRejected', 'false');
-            cookieBanner.classList.remove('active');
-            
-            // Здесь можно добавить инициализацию аналитики и других сервисов
-            initAnalytics();
-        });
-
-        // Обработчик отклонения cookies
-        rejectCookies.addEventListener('click', () => {
-            localStorage.setItem('cookiesAccepted', 'false');
-            localStorage.setItem('cookiesRejected', 'true');
-            cookieBanner.classList.remove('active');
-        });
-
-        // Обработчик настроек (можно расширить функционал)
-        cookieSettings.addEventListener('click', () => {
-            alert('Настройки cookies будут доступны в следующем обновлении.');
-        });
-
-        // Функция для инициализации аналитики (заглушка)
-        function initAnalytics() {
-            console.log('Analytics initialized - cookies accepted');
-            // Здесь будет код для инициализации Google Analytics, Yandex.Metrica и т.д.
-        }
-
-        // Проверяем статус cookies при загрузке
-        if (cookiesAccepted === 'true') {
-            initAnalytics();
-        }        
-    }
-}
-
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
-    initCookieBanner();
-});
-
-// Функция для проверки принятия cookies (можно использовать в других местах)
-function areCookiesAccepted() {
-    return localStorage.getItem('cookiesAccepted') === 'true';
-}
-
-// Функция для принудительного показа баннера (для тестирования)
-function showCookieBanner() {
-    const cookieBanner = document.getElementById('cookieBanner');
-    cookieBanner.classList.add('active');
-}
-
-function optimizeForMobile() {
-    // Отключаем ненужные анимации на слабых устройствах
-    if ('connection' in navigator) {
-        const connection = navigator.connection;
-        if (connection.saveData || connection.effectiveType.includes('2g')) {
-            document.documentElement.classList.add('save-data');
-        }
+// Функция для получения активных товаров
+function getActiveProducts() {
+    let products = [];
+    
+    try {
+        products = JSON.parse(localStorage.getItem('products')) || [];
+    } catch (error) {
+        console.error('Load products error:', error);
+        products = [];
     }
     
-    // Оптимизация для touch устройств
-    if ('ontouchstart' in window) {
-        document.documentElement.classList.add('touch-device');
-    }
-    
-    // Предотвращение масштабирования при двойном тапе (опционально)
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', function(event) {
-        const now = (new Date()).getTime();
-        if (now - lastTouchEnd <= 300) {
-            event.preventDefault();
-        }
-        lastTouchEnd = now;
-    }, false);
+    // Фильтруем только активные товары
+    return products.filter(product => product.active === true);
 }
 
-// Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-    optimizeForMobile();
+// Функция для выбора случайных товаров
+function getRandomProducts(products, count) {
+    const shuffled = [...products].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
+
+// Функция для создания карточки случайного товара
+function createRandomProductCard(product) {
+    const card = document.createElement('div');
+    card.className = 'random-product-card fade-in';
+    
+    const categoryNames = {
+        'pantograph': 'Пантограф',
+        'wardrobe': 'Гардеробная система',
+        'premium': 'Премиум коллекция'
+    };
+    
+    const categoryIcon = {
+        'pantograph': 'fas fa-tshirt',
+        'wardrobe': 'fas fa-archive',
+        'premium': 'fas fa-crown'
+    };
+    
+    const badge = product.badge ? `<div class="random-product-badge">${product.badge}</div>` : '';
+    
+    card.innerHTML = `
+        <div class="random-product-image">
+            <i class="${categoryIcon[product.category] || 'fas fa-cube'}"></i>
+            ${badge}
+        </div>
+        <div class="random-product-content">
+            <div class="random-product-category">${categoryNames[product.category] || product.category}</div>
+            <h3 class="random-product-title">${product.name}</h3>
+            <div class="random-product-price">${formatPrice(product.price)}</div>
+            <ul class="random-product-features">
+                <li>Премиальные материалы</li>
+                <li>Эксклюзивный дизайн</li>
+                <li>Индивидуальный подход</li>
+            </ul>
+            <div class="random-product-actions">
+                <a href="shop.html" class="btn btn-primary btn-small">
+                    <i class="fas fa-shopping-cart"></i> Подробнее
+                </a>
+                <a href="https://t.me/Ma_Furniture_ru" class="btn btn-secondary btn-small">
+                    <i class="fab fa-telegram-plane"></i> Заказать
+                </a>
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Функция для форматирования цены
+function formatPrice(price) {
+    return new Intl.NumberFormat('ru-RU').format(price) + ' ₽';
+}
+
+// Обновляем товары при изменении в админке
+window.addEventListener('message', function(event) {
+    if (event.data.type === 'PRODUCTS_UPDATED') {
+        loadRandomProducts();
+    }
 });

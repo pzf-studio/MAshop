@@ -1,37 +1,42 @@
-// DOM Content Loaded
+// shop.js - Интернет-магазин MA Furniture
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
-// Listen for products updates from admin panel
-window.addEventListener('message', function(event) {
-    if (event.data.type === 'PRODUCTS_UPDATED') {
-        // Перезагружаем товары при обновлении из админки
-        if (window.productsGrid) {
-            loadProducts();
-        }
-    }
-});
-
 function initializeApp() {
-    // Initialize products and pagination
     initializeProducts();
-    
-    // Initialize cart
     initializeCart();
-    
-    // Initialize filters
     initializeFilters();
-    
-    // Initialize modal
     initializeModal();
-    
-    // Initialize mobile menu
     initializeMobileMenu();
+    initializeConsultationForm();
+    setupRealTimeSync(); // Добавляем синхронизацию в реальном времени
 }
 
-// Products data - будет загружаться из localStorage
+// Products data - загружается из localStorage
 let productsData = [];
+
+// Новый метод для синхронизации в реальном времени
+function setupRealTimeSync() {
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'products' && e.newValue) {
+            try {
+                console.log('Обновление данных магазина в реальном времени...');
+                // Перезагружаем товары
+                if (typeof initializeProducts === 'function') {
+                    initializeProducts();
+                }
+                // Обновляем корзину если нужно
+                if (typeof initializeCart === 'function') {
+                    initializeCart();
+                }
+                showNotification('Каталог обновлен', 'success');
+            } catch (error) {
+                console.error('Ошибка обновления магазина:', error);
+            }
+        }
+    });
+}
 
 // Products and pagination functionality
 function initializeProducts() {
@@ -52,31 +57,9 @@ function initializeProducts() {
             products = [];
         }
         
-        // Если нет товаров в localStorage, создаем начальные данные
+        // Если нет товаров в localStorage, возвращаем пустой массив
         if (products.length === 0) {
-            products = [
-                { id: 1, name: "Пантограф Classic Gold", price: 45990, category: "pantograph", badge: "Хит продаж", active: true },
-                { id: 2, name: "Пантограф Modern Silver", price: 32990, category: "pantograph", active: true },
-                { id: 3, name: "Гардеробная система Lux", price: 89990, category: "wardrobe", badge: "Новинка", active: true },
-                { id: 4, name: "Премиум гарнитур Imperial", price: 125990, category: "premium", active: true },
-                { id: 5, name: "Гардеробная система Comfort", price: 75990, category: "wardrobe", active: true },
-                { id: 6, name: "Пантограф Elegance", price: 56990, category: "pantograph", active: true },
-                { id: 7, name: "Премиум комплект Royal", price: 98990, category: "premium", badge: "Хит продаж", active: true },
-                { id: 8, name: "Пантограф Minimal", price: 42990, category: "pantograph", active: true },
-                { id: 9, name: "Гардеробная система Smart", price: 67990, category: "wardrobe", active: true },
-                { id: 10, name: "Премиум набор Prestige", price: 112990, category: "premium", active: true },
-                { id: 11, name: "Пантограф Compact", price: 38990, category: "pantograph", active: true },
-                { id: 12, name: "Гардеробная система Pro", price: 82990, category: "wardrobe", badge: "Новинка", active: true },
-                { id: 13, name: "Премиум коллекция Elite", price: 95990, category: "premium", active: true },
-                { id: 14, name: "Пантограф Standard", price: 49990, category: "pantograph", active: true },
-                { id: 15, name: "Гардеробная система Basic", price: 72990, category: "wardrobe", active: true }
-            ];
-            
-            try {
-                localStorage.setItem('products', JSON.stringify(products));
-            } catch (error) {
-                console.error('Save default products error:', error);
-            }
+            products = [];
         }
         
         // Фильтруем только активные товары
@@ -127,16 +110,34 @@ function initializeProducts() {
         
         const badge = product.badge ? `<div class="product-badge">${product.badge}</div>` : '';
         
+        // Определяем, что показывать в качестве изображения
+        let imageContent = '';
+        if (product.images && product.images.length > 0) {
+            imageContent = `<img src="${product.images[0]}" alt="${product.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
+        }
+        
+        // Fallback если изображение не загрузилось или отсутствует
+        const fallbackContent = `
+            <div style="width: 100%; height: 100%; background: #f0f0f0; display: ${product.images && product.images.length > 0 ? 'none' : 'flex'}; align-items: center; justify-content: center; color: #666; font-size: 1.2rem;">
+                ${product.name}
+            </div>
+        `;
+        
+        // Используем стандартный URL с параметром ID для страницы товара
+        const productUrl = `piece.html?id=${product.id}`;
+        
         card.innerHTML = `
             <div class="product-image">
-                <div style="width: 100%; height: 100%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 1.2rem;">
-                    ${product.name}
-                </div>
+                ${imageContent}
+                ${fallbackContent}
                 ${badge}
                 <button class="quick-view" data-product="${product.id}">Быстрый просмотр</button>
+                <a href="${productUrl}" class="product-link" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></a>
             </div>
             <div class="product-info">
-                <h3 class="product-title">${product.name}</h3>
+                <h3 class="product-title">
+                    <a href="${productUrl}" style="color: inherit; text-decoration: none;">${product.name}</a>
+                </h3>
                 <div class="product-rating">
                     <div class="stars">
                         <i class="fas fa-star"></i>
@@ -155,6 +156,9 @@ function initializeProducts() {
                     <button class="btn-wishlist">
                         <i class="far fa-heart"></i>
                     </button>
+                    <a href="${productUrl}" class="btn btn-outline" style="margin-left: auto;">
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
                 </div>
             </div>
         `;
@@ -245,6 +249,7 @@ function initializeProducts() {
                     showNotification('Товар добавлен в избранное');
                 } else {
                     e.target.style.color = '';
+                    showNotification('Товар удален из избранное');
                 }
             });
         });
@@ -253,25 +258,45 @@ function initializeProducts() {
     // Initialize filters
     function initializeFilters() {
         const filterBtns = document.querySelectorAll('.filter-btn');
+        const categoryBtns = document.querySelectorAll('.category-btn');
         
+        // Filter buttons
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                // Update active filter
+                const filter = btn.dataset.filter;
+                
+                // Update active filter button
                 filterBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 
-                // Update current filter and reset to page 1
-                currentFilter = btn.dataset.filter;
+                // Apply filter
+                if (filter === 'all') {
+                    document.querySelectorAll('.product-card').forEach(card => {
+                        card.style.display = 'block';
+                    });
+                } else {
+                    document.querySelectorAll('.product-card').forEach(card => {
+                        card.style.display = card.dataset.category === filter ? 'block' : 'none';
+                    });
+                }
+            });
+        });
+        
+        // Category buttons
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const category = btn.dataset.category;
+                currentFilter = category;
                 currentPage = 1;
                 
-                // Re-render products
+                // Update active category button
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
                 renderProducts();
             });
         });
     }
-
-    // Load products function for external calls
-    window.loadProducts = renderProducts;
 
     // Initial render
     renderProducts();
@@ -279,121 +304,97 @@ function initializeProducts() {
 
 // Cart functionality
 function initializeCart() {
-    const cartBtn = document.getElementById('cartBtn');
-    const cartSidebar = document.getElementById('cartSidebar');
-    const cartClose = document.getElementById('cartClose');
-    const cartItems = document.querySelector('.cart-items');
-    const cartCount = document.querySelector('.cart-count');
-    const totalPrice = document.querySelector('.total-price');
-    const checkoutBtn = document.querySelector('.btn-checkout');
-    
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     
-    // Update cart display
     function updateCartDisplay() {
-        cartItems.innerHTML = '';
+        const cartCount = document.getElementById('cartCount');
+        const cartTotal = document.getElementById('cartTotal');
+        const cartItems = document.getElementById('cartItems');
+        const cartCountMobile = document.getElementById('cartCountMobile');
         
-        if (cart.length === 0) {
-            cartItems.innerHTML = `
-                <div class="empty-cart">
-                    <i class="fas fa-shopping-cart" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
-                    <p style="text-align: center; color: #666;">Корзина пуста</p>
-                </div>
-            `;
-            cartCount.textContent = '0';
-            totalPrice.textContent = '0 ₽';
-            checkoutBtn.disabled = true;
-            checkoutBtn.style.opacity = '0.6';
-            return;
+        // Update cart count
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        if (cartCount) cartCount.textContent = totalItems;
+        if (cartCountMobile) cartCountMobile.textContent = totalItems;
+        
+        // Update cart total
+        const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        if (cartTotal) cartTotal.textContent = formatPrice(totalPrice);
+        
+        // Update cart items in sidebar
+        if (cartItems) {
+            cartItems.innerHTML = '';
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>Ваша корзина пуста</p>
+                    </div>
+                `;
+            } else {
+                cart.forEach(item => {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'cart-item';
+                    cartItem.innerHTML = `
+                        <div class="cart-item-image">
+                            ${item.image ? `<img src="${item.image}" alt="${item.name}">` : 
+                              `<div style="width: 60px; height: 60px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 0.8rem;">${item.name}</div>`}
+                        </div>
+                        <div class="cart-item-details">
+                            <h4>${item.name}</h4>
+                            <div class="cart-item-price">${formatPrice(item.price)}</div>
+                            <div class="cart-item-controls">
+                                <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                                <span class="quantity">${item.quantity}</span>
+                                <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                                <button class="remove-btn" data-id="${item.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    cartItems.appendChild(cartItem);
+                });
+            }
         }
         
-        checkoutBtn.disabled = false;
-        checkoutBtn.style.opacity = '1';
-        
-        let total = 0;
-        
-        cart.forEach(item => {
-            const product = getActiveProducts().find(p => p.id === item.id);
-            if (!product) {
-                // Если товар больше не активен, удаляем его из корзины
-                removeFromCart(item.id);
-                return;
-            }
-            
-            const itemTotal = product.price * item.quantity;
-            total += itemTotal;
-            
-            const cartItem = document.createElement('div');
-            cartItem.className = 'cart-item';
-            cartItem.innerHTML = `
-                <div class="cart-item-info">
-                    <h4>${product.name}</h4>
-                    <p>${formatPrice(product.price)} × ${item.quantity} = ${formatPrice(itemTotal)}</p>
-                </div>
-                <div class="cart-item-actions">
-                    <button class="quantity-btn minus" data-id="${product.id}">-</button>
-                    <span class="quantity-display">${item.quantity}</span>
-                    <button class="quantity-btn plus" data-id="${product.id}">+</button>
-                    <button class="remove-btn" data-id="${product.id}" title="Удалить">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
-            cartItems.appendChild(cartItem);
-        });
-        
-        cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-        totalPrice.textContent = formatPrice(total);
-        
+        // Attach event listeners to cart controls
         attachCartEventListeners();
     }
     
-    // Attach event listeners to cart items
     function attachCartEventListeners() {
         // Quantity minus buttons
         document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const productId = parseInt(e.target.dataset.id);
-                updateCartQuantity(productId, -1);
+            btn.addEventListener('click', () => {
+                const productId = parseInt(btn.dataset.id);
+                updateCartItemQuantity(productId, -1);
             });
         });
         
         // Quantity plus buttons
         document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const productId = parseInt(e.target.dataset.id);
-                updateCartQuantity(productId, 1);
+            btn.addEventListener('click', () => {
+                const productId = parseInt(btn.dataset.id);
+                updateCartItemQuantity(productId, 1);
             });
         });
         
         // Remove buttons
         document.querySelectorAll('.remove-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const productId = parseInt(e.target.closest('.remove-btn').dataset.id);
+            btn.addEventListener('click', () => {
+                const productId = parseInt(btn.dataset.id);
                 removeFromCart(productId);
             });
         });
     }
     
-    // Get active products for cart
-    function getActiveProducts() {
-        let products = [];
-        
-        try {
-            products = JSON.parse(localStorage.getItem('products')) || [];
-        } catch (error) {
-            console.error('Load products error:', error);
-            products = [];
-        }
-        
-        return products.filter(product => product.active === true);
-    }
-    
-    // Add product to cart
     function addToCart(productId) {
-        const product = getActiveProducts().find(p => p.id === productId);
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+        const product = products.find(p => p.id === productId);
+        
         if (!product) {
-            showNotification('Товар недоступен', 'error');
+            showNotification('Товар не найден', 'error');
             return;
         }
         
@@ -402,29 +403,33 @@ function initializeCart() {
         if (existingItem) {
             existingItem.quantity += 1;
         } else {
-            cart.push({ id: productId, quantity: 1 });
+            cart.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.images && product.images.length > 0 ? product.images[0] : null,
+                quantity: 1
+            });
         }
         
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartDisplay();
+        showNotification('Товар добавлен в корзину');
         
-        // Show notification
-        showNotification(`${product.name} добавлен в корзину`);
-        
-        // Show cart sidebar
-        cartSidebar.classList.add('active');
+        // Показать корзину на мобильных устройствах
+        if (window.innerWidth <= 768) {
+            document.getElementById('cartSidebar').classList.add('active');
+        }
     }
     
-    // Update cart quantity
-    function updateCartQuantity(productId, change) {
+    function updateCartItemQuantity(productId, change) {
         const item = cart.find(item => item.id === productId);
         
         if (item) {
             item.quantity += change;
             
             if (item.quantity <= 0) {
-                removeFromCart(productId);
-                return;
+                cart = cart.filter(item => item.id !== productId);
             }
             
             localStorage.setItem('cart', JSON.stringify(cart));
@@ -432,143 +437,133 @@ function initializeCart() {
         }
     }
     
-    // Remove product from cart
     function removeFromCart(productId) {
-        const product = getActiveProducts().find(p => p.id === productId);
         cart = cart.filter(item => item.id !== productId);
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartDisplay();
-        
-        if (product) {
-            showNotification(`${product.name} удален из корзины`);
-        }
+        showNotification('Товар удален из корзины');
     }
     
-    // Clear cart
-    function clearCart() {
-        cart = [];
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartDisplay();
-    }
-    
-    // Event listeners
-    cartBtn.addEventListener('click', () => {
-        cartSidebar.classList.add('active');
-    });
-    
-    cartClose.addEventListener('click', () => {
-        cartSidebar.classList.remove('active');
-    });
-    
-    checkoutBtn.addEventListener('click', () => {
-        if (cart.length === 0) {
-            showNotification('Корзина пуста', 'error');
-            return;
-        }
-        
-        const total = cart.reduce((sum, item) => {
-            const product = getActiveProducts().find(p => p.id === item.id);
-            return sum + (product ? product.price * item.quantity : 0);
-        }, 0);
-        
-        // Здесь можно добавить логику оформления заказа
-        showNotification(`Заказ оформлен! Сумма: ${formatPrice(total)}`, 'success');
-        clearCart();
-        cartSidebar.classList.remove('active');
-    });
-    
-    // Close cart when clicking outside
-    document.addEventListener('click', (e) => {
-        if (cartSidebar.classList.contains('active') && 
-            !cartSidebar.contains(e.target) && 
-            !cartBtn.contains(e.target)) {
-            cartSidebar.classList.remove('active');
-        }
-    });
-    
-    // Initial cart display
+    // Initialize cart display
     updateCartDisplay();
+    
+    // Make functions available globally
+    window.addToCart = addToCart;
+    window.updateCartItemQuantity = updateCartItemQuantity;
+    window.removeFromCart = removeFromCart;
 }
 
 // Modal functionality
 function initializeModal() {
-    const modal = document.getElementById('quickViewModal');
-    const modalClose = document.getElementById('modalClose');
+    const modal = document.getElementById('productModal');
+    const closeBtn = document.querySelector('.modal-close');
     
-    modalClose.addEventListener('click', () => {
-        modal.classList.remove('active');
-    });
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+    }
     
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.classList.remove('active');
         }
     });
+    
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            modal.classList.remove('active');
+        }
+    });
 }
 
-// Show product modal
 function showProductModal(productId) {
-    const modal = document.getElementById('quickViewModal');
-    const modalBody = document.querySelector('.modal-body');
-    const product = getActiveProducts().find(p => p.id === productId);
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    const product = products.find(p => p.id === productId);
     
     if (!product) {
-        showNotification('Товар недоступен', 'error');
+        showNotification('Товар не найден', 'error');
         return;
     }
     
-    modalBody.innerHTML = `
-        <div class="modal-product">
-            <div class="modal-product-image">
-                <div style="width: 100%; height: 300px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #666; font-size: 1.5rem;">
+    const modal = document.getElementById('productModal');
+    const modalContent = modal.querySelector('.modal-content');
+    
+    // Format features and specifications
+    const featuresHtml = product.features && product.features.length > 0 ? 
+        product.features.map(feature => `<li>${feature}</li>`).join('') : 
+        '<li>Информация отсутствует</li>';
+    
+    const specsHtml = product.specifications && Object.keys(product.specifications).length > 0 ? 
+        Object.entries(product.specifications).map(([key, value]) => `
+            <div class="spec-row">
+                <span class="spec-key">${key}:</span>
+                <span class="spec-value">${value}</span>
+            </div>
+        `).join('') : 
+        '<div class="spec-row">Информация отсутствует</div>';
+    
+    // Image content
+    let imageContent = '';
+    if (product.images && product.images.length > 0) {
+        imageContent = product.images.map((img, index) => `
+            <div class="modal-image ${index === 0 ? 'active' : ''}">
+                <img src="${img}" alt="${product.name}">
+            </div>
+        `).join('');
+    } else {
+        imageContent = `
+            <div class="modal-image active">
+                <div style="width: 100%; height: 300px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #666;">
                     ${product.name}
                 </div>
             </div>
-            <div class="modal-product-info">
+        `;
+    }
+    
+    modalContent.innerHTML = `
+        <button class="modal-close">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-body">
+            <div class="modal-images">
+                ${imageContent}
+            </div>
+            <div class="modal-info">
                 <h2>${product.name}</h2>
-                <div class="modal-product-price">
-                    <span class="current-price">${formatPrice(product.price)}</span>
+                ${product.badge ? `<div class="product-badge">${product.badge}</div>` : ''}
+                <div class="modal-price">${formatPrice(product.price)}</div>
+                
+                <div class="product-description">
+                    <p>${product.description || 'Описание товара отсутствует.'}</p>
                 </div>
-                <div class="modal-product-description">
-                    <p>Элитный ${product.category === 'pantograph' ? 'пантограф' : product.category === 'wardrobe' ? 'гардероб' : 'мебельный гарнитур'} премиум-класса. Изготовлен из высококачественных материалов с вниманием к деталям.</p>
-                    <ul>
-                        <li>Премиальные материалы</li>
-                        <li>Эксклюзивный дизайн</li>
-                        <li>Долговечность и надежность</li>
-                        <li>Легкость в уходе</li>
-                    </ul>
+                
+                <div class="product-features">
+                    <h4>Особенности:</h4>
+                    <ul>${featuresHtml}</ul>
                 </div>
-                <div class="modal-product-actions">
-                    <button class="btn btn-primary btn-add-to-cart" data-product="${product.id}">
-                        <i class="fas fa-shopping-cart"></i> Добавить в корзину
+                
+                <div class="product-specifications">
+                    <h4>Характеристики:</h4>
+                    <div class="specs-list">${specsHtml}</div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="btn btn-primary" onclick="addToCart(${product.id}); showNotification('Товар добавлен в корзину')">
+                        <i class="fas fa-shopping-cart"></i> В корзину
                     </button>
-                    <button class="btn btn-outline btn-wishlist-modal">
-                        <i class="far fa-heart"></i> В избранное
+                    <button class="btn btn-outline">
+                        <i class="far fa-heart"></i>
                     </button>
                 </div>
             </div>
         </div>
     `;
     
-    // Add event listener to modal add to cart button
-    const addToCartBtn = modalBody.querySelector('.btn-add-to-cart');
-    addToCartBtn.addEventListener('click', () => {
-        addToCart(product.id);
+    // Re-attach close event
+    modalContent.querySelector('.modal-close').addEventListener('click', () => {
         modal.classList.remove('active');
-    });
-    
-    // Add event listener to modal wishlist button
-    const wishlistBtn = modalBody.querySelector('.btn-wishlist-modal');
-    wishlistBtn.addEventListener('click', () => {
-        wishlistBtn.querySelector('i').classList.toggle('far');
-        wishlistBtn.querySelector('i').classList.toggle('fas');
-        
-        if (wishlistBtn.querySelector('i').classList.contains('fas')) {
-            wishlistBtn.style.color = '#d4af37';
-            showNotification('Товар добавлен в избранное');
-        } else {
-            wishlistBtn.style.color = '';
-        }
     });
     
     modal.classList.add('active');
@@ -577,17 +572,77 @@ function showProductModal(productId) {
 // Mobile menu functionality
 function initializeMobileMenu() {
     const menuToggle = document.getElementById('menuToggle');
-    const mainNav = document.querySelector('.main-nav');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const closeMenu = document.getElementById('closeMenu');
     
-    menuToggle.addEventListener('click', () => {
-        mainNav.classList.toggle('active');
-        menuToggle.classList.toggle('active');
+    if (menuToggle && mobileMenu) {
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.add('active');
+        });
+    }
+    
+    if (closeMenu && mobileMenu) {
+        closeMenu.addEventListener('click', () => {
+            mobileMenu.classList.remove('active');
+        });
+    }
+    
+    // Cart toggle
+    const cartToggle = document.getElementById('cartToggle');
+    const cartSidebar = document.getElementById('cartSidebar');
+    const closeCart = document.getElementById('closeCart');
+    
+    if (cartToggle && cartSidebar) {
+        cartToggle.addEventListener('click', () => {
+            cartSidebar.classList.add('active');
+        });
+    }
+    
+    if (closeCart && cartSidebar) {
+        closeCart.addEventListener('click', () => {
+            cartSidebar.classList.remove('active');
+        });
+    }
+    
+    // Close cart when clicking outside
+    document.addEventListener('click', (e) => {
+        if (cartSidebar && cartSidebar.classList.contains('active') && 
+            !cartSidebar.contains(e.target) && 
+            e.target !== cartToggle && 
+            !cartToggle.contains(e.target)) {
+            cartSidebar.classList.remove('active');
+        }
     });
+}
+
+// Consultation form functionality
+function initializeConsultationForm() {
+    const form = document.getElementById('consultationForm');
+    
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const name = formData.get('name');
+            const phone = formData.get('phone');
+            
+            // Here you would typically send the data to a server
+            console.log('Consultation request:', { name, phone });
+            
+            showNotification('Заявка отправлена! Мы свяжемся с вами в ближайшее время.', 'success');
+            form.reset();
+        });
+    }
 }
 
 // Utility functions
 function formatPrice(price) {
-    return new Intl.NumberFormat('ru-RU').format(price) + ' ₽';
+    return new Intl.NumberFormat('ru-RU', {
+        style: 'currency',
+        currency: 'RUB',
+        minimumFractionDigits: 0
+    }).format(price);
 }
 
 function showNotification(message, type = 'success') {
@@ -597,43 +652,29 @@ function showNotification(message, type = 'success') {
         existingNotification.remove();
     }
     
+    // Create new notification
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.innerHTML = `
         <div class="notification-content">
-            <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}"></i>
-            <span>${message}</span>
+            <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
+            ${message}
         </div>
     `;
     
     document.body.appendChild(notification);
     
     // Show notification
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 100);
+    setTimeout(() => notification.classList.add('show'), 100);
     
-    // Hide notification after 3 seconds
+    // Hide after 3 seconds
     setTimeout(() => {
         notification.classList.remove('show');
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 300);
+        setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
 
-// Get active products function for external use
-function getActiveProducts() {
-    let products = [];
-    
-    try {
-        products = JSON.parse(localStorage.getItem('products')) || [];
-    } catch (error) {
-        console.error('Load products error:', error);
-        products = [];
-    }
-    
-    return products.filter(product => product.active === true);
-}
+// Make functions available globally
+window.showProductModal = showProductModal;
+window.formatPrice = formatPrice;
+window.showNotification = showNotification;
