@@ -33,6 +33,7 @@
                 <!-- Tabs -->
                 <div class="admin-tabs">
                     <button class="admin-tab active" data-tab="products">Товары</button>
+                    <button class="admin-tab" data-tab="sections">Разделы</button>
                     <button class="admin-tab" data-tab="orders">Заказы</button>
                     <button class="admin-tab" data-tab="statistics">Статистика</button>
                 </div>
@@ -46,6 +47,7 @@
                                     <th>ID</th>
                                     <th>Название</th>
                                     <th>Категория</th>
+                                    <th>Раздел</th>
                                     <th>Цена</th>
                                     <th>Бейдж</th>
                                     <th>Статус</th>
@@ -54,6 +56,38 @@
                             </thead>
                             <tbody id="productsTableBody">
                                 <!-- Products will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Sections Tab -->
+                <div class="admin-content" id="sectionsTab">
+                    <div class="admin-header">
+                        <div>
+                            <h3>Управление разделами</h3>
+                            <small id="sectionsCounter">Разделов: 0</small>
+                        </div>
+                        <div class="admin-actions">
+                            <button class="btn btn-primary" id="addSectionBtn">
+                                <i class="fas fa-plus"></i> Добавить раздел
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="products-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Название</th>
+                                    <th>Код</th>
+                                    <th>Товаров</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sectionsTableBody">
+                                <!-- Sections will be loaded here -->
                             </tbody>
                         </table>
                     </div>
@@ -111,6 +145,13 @@
                                     <option value="premium">Премиум коллекция</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productSection">Раздел *</label>
+                            <select id="productSection" required>
+                                <!-- Sections will be loaded dynamically -->
+                            </select>
                         </div>
                         
                         <div class="form-row">
@@ -185,6 +226,43 @@
         </div>
     </div>
 
+    <!-- Section Modal -->
+    <div class="modal" id="sectionModal">
+        <div class="modal-content">
+            <button class="modal-close" id="sectionModalClose">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-body">
+                <h2 id="sectionModalTitle">Добавить раздел</h2>
+                <form class="product-form" id="sectionForm">
+                    <input type="hidden" id="sectionId">
+                    
+                    <div class="form-group">
+                        <label for="sectionName">Название раздела *</label>
+                        <input type="text" id="sectionName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sectionCode">Код раздела (латинские буквы) *</label>
+                        <input type="text" id="sectionCode" required pattern="[a-zA-Z0-9-]+" title="Только латинские буквы, цифры и дефисы">
+                        <small>Используется для фильтрации, только латинские буквы и цифры</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sectionActive">
+                            <input type="checkbox" id="sectionActive" checked> Активный раздел
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-cancel" id="cancelSectionBtn">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Сохранить раздел</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Confirmation Modal -->
     <div class="modal" id="confirmModal">
         <div class="modal-content">
@@ -194,6 +272,20 @@
                 <div class="form-actions">
                     <button class="btn btn-cancel" id="cancelDelete">Отмена</button>
                     <button class="btn btn-delete" id="confirmDelete">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Confirmation Modal -->
+    <div class="modal" id="sectionConfirmModal">
+        <div class="modal-content">
+            <div class="modal-body">
+                <h3>Подтверждение удаления</h3>
+                <p id="sectionConfirmMessage">Вы уверены, что хотите удалить этот раздел?</p>
+                <div class="form-actions">
+                    <button class="btn btn-cancel" id="cancelSectionDelete">Отмена</button>
+                    <button class="btn btn-delete" id="confirmSectionDelete">Удалить</button>
                 </div>
             </div>
         </div>

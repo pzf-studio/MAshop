@@ -10,38 +10,40 @@
     <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-    <!-- Header -->
-    <header class="admin-header">
-        <div class="admin-header-content">
-            <div class="admin-logo">
-                <a href="index.html">
-                    <span class="logo-text">MA FURNITURE</span>
-                    <span class="logo-subtitle">Админ-панель</span>
-                </a>
-            </div>
-            
-            <nav class="admin-nav">
-                <ul>
-                    <li><a href="shop.html">Магазин</a></li>
-                    <li><a href="admin.html" class="active">Админ-панель</a></li>
-                    <li><a href="#" id="logoutBtn">
-                        <i class="fas fa-sign-out-alt"></i> Выйти
-                    </a></li>
-                </ul>
-            </nav>
-            
-            <div class="admin-user">
-                <span class="user-name">Администратор</span>
-                <div class="user-avatar">
-                    <i class="fas fa-user-shield"></i>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <span class="logo-text">MA FURNITURE</span>
+                    </a>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html">Главная</a></li>
+                        <li><a href="shop.html">Магазин</a></li>
+                        <li><a href="index.html#about">О компании</a></li>
+                        <li><a href="index.html#faq">FAQ</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="header-actions">
+                    <button class="cart-btn" id="cartBtn">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <a href="https://t.me/Ma_Furniture_ru" class="btn btn-outline btn-telegram">
+                        <i class="fab fa-telegram-plane"></i>
+                        <span>Telegram</span>
+                    </a>
+                    <button class="menu-toggle" id="menuToggle">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
                 </div>
             </div>
-            
-            <button class="admin-menu-toggle" id="menuToggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
         </div>
     </header>
 

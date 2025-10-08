@@ -2,7 +2,9 @@
 class AdminPanel {
     constructor() {
         this.products = JSON.parse(localStorage.getItem('adminProducts')) || [];
+        this.sections = JSON.parse(localStorage.getItem('adminSections')) || this.getDefaultSections();
         this.currentProductId = null;
+        this.currentSectionId = null;
         this.currentPage = 1;
         this.productsPerPage = 10;
         this.filteredProducts = [];
@@ -14,8 +16,26 @@ class AdminPanel {
     init() {
         this.setupEventListeners();
         this.loadProducts();
+        this.loadSections();
         this.renderProductsTable();
+        this.renderSectionsTable();
         this.updateProductCounter();
+        this.updateSectionsCounter();
+        this.populateSectionSelect();
+    }
+
+    getDefaultSections() {
+        return [
+            { id: 1, name: 'Все товары', code: 'all', active: true, productCount: 0 },
+            { id: 2, name: 'Пантографы', code: 'pantograph', active: true, productCount: 0 },
+            { id: 3, name: 'Nuomi Hera', code: 'nuomi-hera', active: true, productCount: 0 },
+            { id: 4, name: 'Nuomi Ralphie', code: 'nuomi-ralphie', active: true, productCount: 0 },
+            { id: 5, name: 'Коллекция Wise', code: 'wise', active: true, productCount: 0 },
+            { id: 6, name: 'Коллекция Time', code: 'time', active: true, productCount: 0 },
+            { id: 7, name: 'Кухонные лифты', code: 'kitchen', active: true, productCount: 0 },
+            { id: 8, name: 'Гардеробные системы', code: 'wardrobe', active: true, productCount: 0 },
+            { id: 9, name: 'Премиум коллекция', code: 'premium', active: true, productCount: 0 }
+        ];
     }
 
     setupEventListeners() {
@@ -31,14 +51,23 @@ class AdminPanel {
         document.getElementById('cancelBtn').addEventListener('click', () => this.closeProductModal());
         document.getElementById('modalClose').addEventListener('click', () => this.closeProductModal());
 
+        // Section actions
+        document.getElementById('addSectionBtn').addEventListener('click', () => this.openSectionModal());
+        document.getElementById('sectionForm').addEventListener('submit', (e) => this.saveSection(e));
+        document.getElementById('cancelSectionBtn').addEventListener('click', () => this.closeSectionModal());
+        document.getElementById('sectionModalClose').addEventListener('click', () => this.closeSectionModal());
+
         // Badge selector
         document.querySelectorAll('.badge-option').forEach(option => {
             option.addEventListener('click', (e) => this.selectBadge(e.currentTarget));
         });
 
-        // Confirmation modal
+        // Confirmation modals
         document.getElementById('cancelDelete').addEventListener('click', () => this.closeConfirmModal());
         document.getElementById('confirmDelete').addEventListener('click', () => this.confirmDelete());
+        
+        document.getElementById('cancelSectionDelete').addEventListener('click', () => this.closeSectionConfirmModal());
+        document.getElementById('confirmSectionDelete').addEventListener('click', () => this.confirmSectionDelete());
 
         // Image upload
         document.getElementById('uploadImagesBtn').addEventListener('click', () => {
@@ -81,6 +110,12 @@ class AdminPanel {
             content.classList.remove('active');
         });
         document.getElementById(`${tabName}Tab`).classList.add('active');
+
+        // Update counters when switching to sections tab
+        if (tabName === 'sections') {
+            this.updateSectionProductCounts();
+            this.renderSectionsTable();
+        }
     }
 
     loadProducts() {
@@ -92,13 +127,35 @@ class AdminPanel {
         this.filteredProducts = [...this.products];
     }
 
+    loadSections() {
+        // Load sections from localStorage or initialize with default sections
+        if (this.sections.length === 0) {
+            this.sections = this.getDefaultSections();
+            this.saveSections();
+        }
+    }
+
+    populateSectionSelect() {
+        const select = document.getElementById('productSection');
+        select.innerHTML = '<option value="">Выберите раздел</option>';
+        
+        this.sections
+            .filter(section => section.active)
+            .forEach(section => {
+                const option = document.createElement('option');
+                option.value = section.code;
+                option.textContent = section.name;
+                select.appendChild(option);
+            });
+    }
+
     renderProductsTable() {
         const tbody = document.getElementById('productsTableBody');
         
         if (this.filteredProducts.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="empty-state">
+                    <td colspan="8" class="empty-state">
                         <p>Товары не найдены</p>
                     </td>
                 </tr>
@@ -106,7 +163,9 @@ class AdminPanel {
             return;
         }
 
-        tbody.innerHTML = this.filteredProducts.map(product => `
+        tbody.innerHTML = this.filteredProducts.map(product => {
+            const section = this.sections.find(s => s.code === product.section) || { name: 'Не указан' };
+            return `
             <tr data-product-id="${product.id}">
                 <td>${product.id}</td>
                 <td>
@@ -122,6 +181,7 @@ class AdminPanel {
                     </div>
                 </td>
                 <td>${product.category}</td>
+                <td>${section.name}</td>
                 <td>₽ ${product.price.toLocaleString()}</td>
                 <td>
                     ${product.badge ? `<span class="status-badge" style="background: #3498db;">${product.badge}</span>` : '-'}
@@ -146,7 +206,59 @@ class AdminPanel {
                     </div>
                 </td>
             </tr>
+        `}).join('');
+    }
+
+    renderSectionsTable() {
+        const tbody = document.getElementById('sectionsTableBody');
+        this.updateSectionProductCounts();
+        
+        if (this.sections.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-state">
+                        <p>Разделы не найдены</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = this.sections.map(section => `
+            <tr data-section-id="${section.id}">
+                <td>${section.id}</td>
+                <td>${section.name}</td>
+                <td>${section.code}</td>
+                <td style="text-align: center;">${section.productCount}</td>
+                <td>
+                    <span class="status-badge ${section.active ? 'active' : 'inactive'}">
+                        ${section.active ? 'Активен' : 'Неактивен'}
+                    </span>
+                </td>
+                <td>
+                    <div class="product-actions">
+                        <button class="btn-edit" onclick="admin.editSection(${section.id})">
+                            <i class="fas fa-edit"></i> Изменить
+                        </button>
+                        <button class="btn-toggle-active" onclick="admin.toggleSectionActive(${section.id})">
+                            <i class="fas ${section.active ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                            ${section.active ? 'Скрыть' : 'Показать'}
+                        </button>
+                        <button class="btn-delete" onclick="admin.deleteSection(${section.id})">
+                            <i class="fas fa-trash"></i> Удалить
+                        </button>
+                    </div>
+                </td>
+            </tr>
         `).join('');
+    }
+
+    updateSectionProductCounts() {
+        this.sections.forEach(section => {
+            section.productCount = this.products.filter(product => 
+                product.section === section.code && product.active
+            ).length;
+        });
     }
 
     openProductModal(productId = null) {
@@ -184,6 +296,7 @@ class AdminPanel {
         document.querySelectorAll('.badge-option').forEach(opt => opt.classList.remove('selected'));
         document.querySelector('.badge-option[data-badge=""]').classList.add('selected');
         document.getElementById('productSku').value = this.generateSKU();
+        document.getElementById('productSection').value = '';
     }
 
     populateProductForm(product) {
@@ -191,6 +304,7 @@ class AdminPanel {
         document.getElementById('productName').value = product.name;
         document.getElementById('productPrice').value = product.price;
         document.getElementById('productCategory').value = product.category;
+        document.getElementById('productSection').value = product.section || 'all';
         document.getElementById('productDescription').value = product.description || '';
         document.getElementById('productSku').value = product.sku;
         document.getElementById('productStock').value = product.stock || 0;
@@ -290,6 +404,7 @@ class AdminPanel {
             name: document.getElementById('productName').value,
             price: parseInt(document.getElementById('productPrice').value),
             category: document.getElementById('productCategory').value,
+            section: document.getElementById('productSection').value || 'all',
             description: document.getElementById('productDescription').value,
             badge: document.getElementById('productBadge').value,
             sku: document.getElementById('productSku').value || this.generateSKU(),
@@ -375,6 +490,142 @@ class AdminPanel {
         this.currentProductId = null;
     }
 
+    // Section Methods
+    openSectionModal(sectionId = null) {
+        this.currentSectionId = sectionId;
+        const modal = document.getElementById('sectionModal');
+        const title = document.getElementById('sectionModalTitle');
+        
+        if (sectionId) {
+            // Edit mode
+            title.textContent = 'Редактировать раздел';
+            const section = this.sections.find(s => s.id === sectionId);
+            this.populateSectionForm(section);
+        } else {
+            // Add mode
+            title.textContent = 'Добавить раздел';
+            this.resetSectionForm();
+        }
+        
+        modal.classList.add('active');
+    }
+
+    resetSectionForm() {
+        document.getElementById('sectionForm').reset();
+        document.getElementById('sectionId').value = '';
+        document.getElementById('sectionCode').value = '';
+    }
+
+    populateSectionForm(section) {
+        document.getElementById('sectionId').value = section.id;
+        document.getElementById('sectionName').value = section.name;
+        document.getElementById('sectionCode').value = section.code;
+        document.getElementById('sectionActive').checked = section.active;
+    }
+
+    closeSectionModal() {
+        document.getElementById('sectionModal').classList.remove('active');
+    }
+
+    saveSection(e) {
+        e.preventDefault();
+        
+        const sectionId = document.getElementById('sectionId').value;
+        const sectionCode = document.getElementById('sectionCode').value.toLowerCase();
+        
+        // Check if code is unique
+        const existingSection = this.sections.find(s => 
+            s.code === sectionCode && s.id !== parseInt(sectionId)
+        );
+        
+        if (existingSection) {
+            this.showNotification('Раздел с таким кодом уже существует', 'error');
+            return;
+        }
+
+        const sectionData = {
+            name: document.getElementById('sectionName').value,
+            code: sectionCode,
+            active: document.getElementById('sectionActive').checked
+        };
+
+        let notificationMessage = '';
+
+        if (sectionId) {
+            // Update existing section
+            const index = this.sections.findIndex(s => s.id === parseInt(sectionId));
+            this.sections[index] = { 
+                ...this.sections[index], 
+                ...sectionData
+            };
+            notificationMessage = 'Раздел успешно обновлен';
+        } else {
+            // Add new section
+            const newSection = {
+                id: this.sections.length > 0 ? Math.max(...this.sections.map(s => s.id)) + 1 : 1,
+                productCount: 0,
+                ...sectionData
+            };
+            this.sections.push(newSection);
+            notificationMessage = 'Раздел успешно добавлен';
+        }
+
+        this.saveSections();
+        this.closeSectionModal();
+        this.showNotification(notificationMessage, 'success');
+    }
+
+    editSection(sectionId) {
+        this.openSectionModal(sectionId);
+    }
+
+    toggleSectionActive(sectionId) {
+        const section = this.sections.find(s => s.id === sectionId);
+        if (section) {
+            section.active = !section.active;
+            this.saveSections();
+            
+            this.showNotification(
+                `Раздел "${section.name}" ${section.active ? 'активирован' : 'деактивирован'}`,
+                'success'
+            );
+        }
+    }
+
+    deleteSection(sectionId) {
+        const section = this.sections.find(s => s.id === sectionId);
+        if (!section) return;
+
+        // Check if section has products
+        const productsInSection = this.products.filter(p => p.section === section.code && p.active);
+        
+        if (productsInSection.length > 0) {
+            document.getElementById('sectionConfirmMessage').textContent = 
+                `Раздел "${section.name}" содержит ${productsInSection.length} товаров. Удаление невозможно. Сначала переместите товары в другие разделы.`;
+            document.getElementById('confirmSectionDelete').style.display = 'none';
+        } else {
+            document.getElementById('sectionConfirmMessage').textContent = 
+                `Вы уверены, что хотите удалить раздел "${section.name}"?`;
+            document.getElementById('confirmSectionDelete').style.display = 'block';
+        }
+
+        this.currentSectionId = sectionId;
+        document.getElementById('sectionConfirmModal').classList.add('active');
+    }
+
+    confirmSectionDelete() {
+        this.sections = this.sections.filter(s => s.id !== this.currentSectionId);
+        this.saveSections();
+        this.closeSectionConfirmModal();
+        this.showNotification('Раздел успешно удален', 'success');
+    }
+
+    closeSectionConfirmModal() {
+        document.getElementById('sectionConfirmModal').classList.remove('active');
+        this.currentSectionId = null;
+        document.getElementById('confirmSectionDelete').style.display = 'block';
+    }
+
     selectBadge(element) {
         document.querySelectorAll('.badge-option').forEach(opt => opt.classList.remove('selected'));
         element.classList.add('selected');
@@ -383,8 +634,12 @@ class AdminPanel {
 
     refreshData() {
         this.loadProducts();
+        this.loadSections();
         this.renderProductsTable();
+        this.renderSectionsTable();
         this.updateProductCounter();
+        this.updateSectionsCounter();
+        this.populateSectionSelect();
         this.showNotification('Данные обновлены', 'success');
     }
 
@@ -406,6 +661,13 @@ class AdminPanel {
                     addBtn.style.cursor = 'pointer';
                 }
             }
+        }
+    }
+
+    updateSectionsCounter() {
+        const counter = document.getElementById('sectionsCounter');
+        if (counter) {
+            counter.textContent = `Разделов: ${this.sections.length}`;
         }
     }
 
@@ -462,12 +724,21 @@ class AdminPanel {
         this.triggerStorageEvent();
     }
 
-    triggerStorageEvent() {
+    saveSections() {
+        localStorage.setItem('adminSections', JSON.stringify(this.sections));
+        this.renderSectionsTable();
+        this.updateSectionsCounter();
+        this.populateSectionSelect();
+        this.syncSectionsWithShop();
+        this.triggerStorageEvent('adminSections');
+    }
+
+    triggerStorageEvent(key = 'adminProducts') {
         try {
             const event = new StorageEvent('storage', {
-                key: 'adminProducts',
-                newValue: JSON.stringify(this.products),
-                oldValue: localStorage.getItem('adminProducts'),
+                key: key,
+                newValue: localStorage.getItem(key),
+                oldValue: localStorage.getItem(key),
                 url: window.location.href,
                 storageArea: localStorage
             });
@@ -484,6 +755,7 @@ class AdminPanel {
             name: product.name,
             price: product.price,
             category: this.mapCategoryToShop(product.category),
+            section: product.section || 'all',
             description: product.description,
             badge: product.badge,
             active: product.active,
@@ -510,6 +782,23 @@ class AdminPanel {
             window.dispatchEvent(event);
         } catch (error) {
             console.error('Ошибка синхронизации с магазином:', error);
+        }
+    }
+
+    syncSectionsWithShop() {
+        const activeSections = this.sections.filter(section => section.active);
+        try {
+            localStorage.setItem('sections', JSON.stringify(activeSections));
+            console.log('Разделы синхронизированы с магазином:', activeSections.length);
+            
+            const event = new StorageEvent('storage', {
+                key: 'sections',
+                newValue: JSON.stringify(activeSections),
+                oldValue: localStorage.getItem('sections')
+            });
+            window.dispatchEvent(event);
+        } catch (error) {
+            console.error('Ошибка синхронизации разделов с магазином:', error);
         }
     }
 

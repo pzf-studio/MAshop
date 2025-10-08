@@ -23,7 +23,6 @@ body {
     line-height: 1.6;
     color: var(--text-dark);
     background: var(--white);
-    overflow-x: hidden;
 }
 
 .container {
@@ -51,19 +50,32 @@ body {
     padding: 1rem 0;
 }
 
-.logo h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
-    font-weight: 700;
+.logo a {
+    text-decoration: none;
     color: var(--text-dark);
 }
 
-.nav {
+.logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    display: block;
+}
+
+.logo-subtitle {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    letter-spacing: 1px;
+}
+
+.main-nav ul {
     display: flex;
+    list-style: none;
     gap: 2rem;
 }
 
-.nav a {
+.main-nav a {
     text-decoration: none;
     color: var(--text-dark);
     font-weight: 500;
@@ -71,11 +83,11 @@ body {
     position: relative;
 }
 
-.nav a:hover {
+.main-nav a:hover {
     color: var(--primary-color);
 }
 
-.nav a::after {
+.main-nav a::after {
     content: '';
     position: absolute;
     bottom: -5px;
@@ -86,7 +98,7 @@ body {
     transition: var(--transition);
 }
 
-.nav a:hover::after {
+.main-nav a:hover::after {
     width: 100%;
 }
 
@@ -96,36 +108,26 @@ body {
     gap: 1rem;
 }
 
-.btn-icon {
+.cart-btn {
+    position: relative;
     background: none;
     border: none;
     font-size: 1.2rem;
     color: var(--text-dark);
     cursor: pointer;
     transition: var(--transition);
-    padding: 0.5rem;
-    border-radius: 5px;
-}
-
-.btn-icon:hover {
-    background: var(--bg-light);
-    color: var(--primary-color);
-}
-
-.cart-toggle {
-    position: relative;
 }
 
 .cart-count {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: -8px;
+    right: -8px;
     background: var(--primary-color);
     color: var(--white);
     border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 0.7rem;
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -133,11 +135,18 @@ body {
 
 .menu-toggle {
     display: none;
+    flex-direction: column;
     background: none;
     border: none;
-    font-size: 1.2rem;
     cursor: pointer;
-    color: var(--text-dark);
+    gap: 4px;
+}
+
+.menu-toggle span {
+    width: 25px;
+    height: 3px;
+    background: var(--text-dark);
+    transition: var(--transition);
 }
 
 /* Mobile Menu */
@@ -553,10 +562,6 @@ body {
     margin: 0;
 }
 
-.quantity-input[type=number] {
-    -moz-appearance: textfield;
-}
-
 .btn-add-to-cart {
     flex: 1;
     min-width: 200px;
@@ -667,13 +672,13 @@ body {
     gap: 2rem;
 }
 
+/* Product Cards */
 .product-card {
     background: var(--white);
     border-radius: 10px;
     overflow: hidden;
     box-shadow: var(--shadow);
     transition: var(--transition);
-    position: relative;
 }
 
 .product-card:hover {
@@ -686,6 +691,18 @@ body {
     height: 250px;
     overflow: hidden;
     background: #f5f5f5;
+}
+
+.product-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    font-weight: 600;
 }
 
 .product-image img {
@@ -1234,4 +1251,55 @@ body {
         left: 10px;
         max-width: none;
     }
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: var(--primary-color);
+    color: var(--white);
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+    font-weight: 600;
+}
+
+.btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-dark);
+    border: 2px solid var(--primary-color);
+}
+
+.btn-secondary:hover {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-dark);
+    border: 2px solid var(--border-color);
+}
+
+.btn-outline:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
 }
