@@ -178,9 +178,9 @@ body {
 }
 
 .btn-secondary {
-    background: transparent;
-    color: var(--text-dark);
-    border: 2px solid var(--primary-color);
+    background: var(--primary-color);
+    color: var(--white);
+    border: 2px solid var(--primary-dark);
 }
 
 .btn-secondary:hover {
@@ -217,8 +217,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(139, 115, 85, 0.8) 0%, rgba(109, 92, 70, 0.8) 100%), 
-                url('/images/example.png') center/cover no-repeat;
+    background: url('/images/hero.jpg') center/cover no-repeat;
     z-index: -2;
 }
 
@@ -236,9 +235,13 @@ body {
     text-align: center;
     max-width: 800px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 40px 30px;
     position: relative;
     z-index: 1;
+    background: rgba(255, 255, 255, 0.85); /* Полупрозрачный белый фон */
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px); /* Эффект размытия для современного вида */
 }
 
 .hero-title {
@@ -246,23 +249,35 @@ body {
     font-size: 3.5rem;
     font-weight: 700;
     margin-bottom: 1.5rem;
-    color: var(--white);
+    color: var(--text-dark); /* Черный цвет текста */
     line-height: 1.2;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-.hero-title span {
-    color: #f8f8f8;
+.hero-title .brand-name {
     display: block;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    font-size: 3.8rem;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+}
+
+.hero-title .brand-subtitle {
+    display: block;
+    font-size: 1.8rem;
+    color: var(--text-dark);
+    font-weight: 500;
+    line-height: 1.4;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid var(--primary-color);
 }
 
 .hero-subtitle {
     font-size: 1.25rem;
     margin-bottom: 2.5rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-dark); /* Черный цвет */
     line-height: 1.6;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    font-weight: 500;
 }
 
 .hero-buttons {
@@ -282,21 +297,52 @@ body {
 .scroll-arrow {
     width: 30px;
     height: 30px;
-    border-right: 2px solid var(--white);
-    border-bottom: 2px solid var(--white);
+    border-right: 2px solid var(--text-dark); /* Черные стрелки */
+    border-bottom: 2px solid var(--text-dark);
     transform: rotate(45deg);
     animation: bounce 2s infinite;
 }
 
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: rotate(45deg) translateY(0);
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .hero-content {
+        padding: 30px 20px;
+        margin: 0 15px;
     }
-    40% {
-        transform: rotate(45deg) translateY(-10px);
+    
+    .hero-title {
+        font-size: 2.5rem;
     }
-    60% {
-        transform: rotate(45deg) translateY(-5px);
+    
+    .hero-title .brand-name {
+        font-size: 2.8rem;
+    }
+    
+    .hero-title .brand-subtitle {
+        font-size: 1.4rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-content {
+        padding: 25px 15px;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-title .brand-name {
+        font-size: 2.2rem;
+    }
+    
+    .hero-title .brand-subtitle {
+        font-size: 1.2rem;
+        padding-top: 0.8rem;
     }
 }
 
@@ -326,50 +372,128 @@ section {
 }
 
 .about-content p {
-    margin-bottom: 20px;
-    font-size: 18px;
+    margin-bottom: 25px;
+    font-size: 1.1rem;
     line-height: 1.8;
+    color: var(--text-dark);
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
 }
 
 .about-content ul {
     text-align: left;
     margin: 30px 0;
+    padding-left: 20px;
 }
 
 .about-content li {
-    margin-bottom: 15px;
-    font-size: 16px;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-light);
 }
 
 .about-features {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 40px;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
 }
 
 .feature-item {
     text-align: center;
+    padding: 30px 20px;
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.feature-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 .feature-icon {
-    font-size: 2rem;
+    font-size: 2.5rem;
     color: var(--primary-color);
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .feature-item h3 {
-    font-size: 36px;
-    color: var(--primary-color);
-    margin-bottom: 10px;
+    font-size: 1.5rem;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+    font-weight: 600;
+    line-height: 1.3;
 }
 
 .feature-item p {
-    font-size: 14px;
+    font-size: 1rem;
     color: var(--text-light);
+    line-height: 1.6;
+    margin: 0;
 }
 
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .about-content {
+        margin: 0 auto 40px;
+        padding: 0 15px;
+    }
+    
+    .about-content p {
+        font-size: 1rem;
+        line-height: 1.7;
+        text-align: left;
+        text-justify: auto;
+    }
+    
+    .about-features {
+        grid-template-columns: 1fr;
+        gap: 25px;
+        max-width: 500px;
+        padding: 0 15px;
+    }
+    
+    .feature-item {
+        padding: 25px 15px;
+    }
+    
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 15px;
+    }
+    
+    .feature-item h3 {
+        font-size: 1.3rem;
+    }
+    
+    .feature-item p {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .about-content p {
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    
+    .about-features {
+        gap: 20px;
+    }
+    
+    .feature-item {
+        padding: 20px 15px;
+    }
+    
+    .feature-item h3 {
+        font-size: 1.2rem;
+    }
+}
 /* Shop Preview Section */
 .shop-preview {
     padding: 80px 0;
@@ -934,8 +1058,8 @@ section {
     }
     
     .hero-background {
-        background: linear-gradient(135deg, rgba(139, 115, 85, 0.9) 0%, rgba(109, 92, 70, 0.9) 100%), 
-                    url('/images/example.png') center/cover no-repeat;
+        background:  
+                    url('/images/hero.jpg') center/cover no-repeat;
     }
     
     .about-features {
@@ -1020,8 +1144,8 @@ section {
     }
     
     .hero-background {
-        background: linear-gradient(135deg, rgba(139, 115, 85, 0.95) 0%, rgba(109, 92, 70, 0.95) 100%), 
-                    url('/images/example.png') center/cover no-repeat;
+        background:  
+                    url('/images/hero.jpg') center/cover no-repeat;
     }
 }
 
@@ -1050,17 +1174,6 @@ section {
 }
 
 .btn-primary {
-    background: var(--primary-color);
-    color: var(--white);
-}
-
-.btn-secondary {
-    background: transparent;
-    color: var(--text-dark);
-    border: 2px solid var(--primary-color);
-}
-
-.btn-secondary:hover {
     background: var(--primary-color);
     color: var(--white);
 }
