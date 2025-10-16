@@ -14,7 +14,13 @@
             <div class="header-content">
                 <div class="logo">
                     <a href="index.html">
-                        <span class="logo-text">MA FURNITURE</span>
+                        <div class="logo-container">
+                            <img src="./images/logo2.png" alt="MA Furniture" class="logo-image">
+                            <div class="logo-text-container">
+                                <span class="logo-text">MA FURNITURE</span>
+                                
+                            </div>
+                        </div>
                     </a>
                 </div>
                 
@@ -47,7 +53,6 @@
     </header>
 
     <!-- Hero Section -->
-    <!-- Замените hero section на эту -->
     <section class="hero">
         <div class="container">
             <h1 class="hero-title">Каталог элитной мебели</h1>
@@ -142,8 +147,7 @@
         </div>
     </footer>
 
-    <!-- Consultation Section -->
-
+    <!-- Cart Sidebar -->
     <div class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
             <h3>Корзина</h3>
@@ -182,6 +186,18 @@
         </div>
     </div>
 
+    <!-- Product Quick View Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-body" id="modalBody">
+                <!-- Modal content will be added dynamically -->
+            </div>
+        </div>
+    </div>
+
     <!-- Order Success Modal -->
     <div class="order-success-modal" id="orderSuccessModal">
         <div class="order-success-content">
@@ -189,22 +205,18 @@
                 <i class="fas fa-check"></i>
             </div>
             <h3>Заказ оформлен!</h3>
-            <p>Спасибо за ваш заказ! Мы свяжемся с вами в ближайшее время для подтверждения деталей.</p>
+            <p>Спасибо за ваш заказ! Мы свяжемся с вами в ближайшее время для подтверждения и уточнения деталей.</p>
             <button class="btn btn-primary" id="successCloseBtn">
                 Продолжить покупки
             </button>
         </div>
     </div>
 
-    <!-- Quick View Modal -->
-    <div class="modal" id="quickViewModal">
-        <div class="modal-content">
-            <button class="modal-close" id="modalClose">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="modal-body">
-                <!-- Modal content will be added dynamically -->
-            </div>
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <i class="fas fa-check-circle"></i>
+            <span id="notificationMessage">Товар добавлен в корзину</span>
         </div>
     </div>
 
