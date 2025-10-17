@@ -18,7 +18,6 @@
                             <img src="./images/logo2.png" alt="MA Furniture" class="logo-image">
                             <div class="logo-text-container">
                                 <span class="logo-text">MA FURNITURE</span>
-                                
                             </div>
                         </div>
                     </a>
@@ -34,10 +33,12 @@
                 </nav>
                 
                 <div class="header-actions">
-                    <button class="cart-btn" id="cartBtn">
+                    <!-- Добавлена иконка корзины -->
+                    <button class="cart-icon" id="cartIcon">
                         <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count">0</span>
+                        <span class="cart-count" id="cartCount">0</span>
                     </button>
+                    
                     <a href="https://t.me/Ma_Furniture_ru" class="btn btn-outline btn-telegram">
                         <i class="fab fa-telegram-plane"></i>
                         <span>Telegram</span>
@@ -147,45 +148,6 @@
         </div>
     </footer>
 
-    <!-- Cart Sidebar -->
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <h3>Корзина</h3>
-            <button class="cart-close" id="cartClose">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="cart-items" id="cartItemsContainer">
-            <!-- Cart items will be added dynamically -->
-        </div>
-        <div class="cart-footer">
-            <div class="cart-summary">
-                <div class="cart-total">
-                    <span>Итого:</span>
-                    <span class="total-price">0 ₽</span>
-                </div>
-                <div class="cart-count">
-                    <span class="total-items">0 товаров</span>
-                </div>
-            </div>
-            
-            <div class="cart-comment">
-                <textarea id="orderComment" placeholder="Комментарий к заказу (необязательно)"></textarea>
-            </div>
-            
-            <div class="cart-actions">
-                <button class="btn btn-primary btn-checkout" id="checkoutBtn">
-                    <i class="fas fa-paper-plane"></i>
-                    Оформить заказ
-                </button>
-                <button class="btn btn-continue-shopping" id="continueShoppingBtn">
-                    <i class="fas fa-arrow-left"></i>
-                    Продолжить покупки
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Product Quick View Modal -->
     <div class="modal" id="productModal">
         <div class="modal-content">
@@ -198,17 +160,35 @@
         </div>
     </div>
 
-    <!-- Order Success Modal -->
-    <div class="order-success-modal" id="orderSuccessModal">
-        <div class="order-success-content">
-            <div class="order-success-icon">
-                <i class="fas fa-check"></i>
+    <!-- Корзина -->
+    <div class="cart-overlay" id="cartOverlay">
+        <div class="cart-sidebar">
+            <div class="cart-header">
+                <h3 class="cart-title">Корзина</h3>
+                <button class="cart-close" id="cartClose">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <h3>Заказ оформлен!</h3>
-            <p>Спасибо за ваш заказ! Мы свяжемся с вами в ближайшее время для подтверждения и уточнения деталей.</p>
-            <button class="btn btn-primary" id="successCloseBtn">
-                Продолжить покупки
-            </button>
+            
+            <div class="cart-content" id="cartContent">
+                <!-- Содержимое корзины будет добавляться динамически -->
+            </div>
+            
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Итого:</span>
+                    <span class="cart-total-amount" id="cartTotalAmount">0 ₽</span>
+                </div>
+                <div class="cart-actions">
+                    <button class="btn-checkout" id="checkoutBtn">
+                        <i class="fas fa-shopping-bag"></i>
+                        Оформить заказ
+                    </button>
+                    <button class="btn-continue-shopping" id="continueShoppingBtn">
+                        Продолжить покупки
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
