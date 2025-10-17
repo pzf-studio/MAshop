@@ -1,3 +1,4 @@
+// sync.js - Улучшенная синхронизация данных
 class DataSync {
     static syncProducts() {
         try {
@@ -7,6 +8,7 @@ class DataSync {
                 name: product.name,
                 price: product.price,
                 category: product.category,
+                section: product.section || 'all',
                 description: product.description,
                 badge: product.badge,
                 active: product.active,
@@ -22,9 +24,18 @@ class DataSync {
             
             localStorage.setItem('products', JSON.stringify(shopProducts));
             
-            // Триггерим событие для мгновенного обновления
-            window.dispatchEvent(new Event('storage'));
+            // Триггерим кастомное событие для мгновенного обновления
+            window.dispatchEvent(new CustomEvent('productsUpdated', {
+                detail: { products: shopProducts }
+            }));
             
+            // Также триггерим storage event для других вкладок
+            window.dispatchEvent(new StorageEvent('storage', {
+                key: 'products',
+                newValue: JSON.stringify(shopProducts)
+            }));
+            
+            console.log('Синхронизация завершена:', shopProducts.length, 'товаров');
             return true;
         } catch (error) {
             console.error('Sync error:', error);
@@ -47,4 +58,50 @@ class DataSync {
     static instantSync() {
         return this.syncProducts();
     }
+
+    // Синхронизация разделов
+    static syncSections() {
+        try {
+            const adminSections = JSON.parse(localStorage.getItem('adminSections')) || [];
+            const activeSections = adminSections.filter(section => section.active);
+            
+            localStorage.setItem('sections', JSON.stringify(activeSections));
+            
+            window.dispatchEvent(new CustomEvent('sectionsUpdated', {
+                detail: { sections: activeSections }
+            }));
+            
+            console.log('Синхронизация разделов завершена:', activeSections.length, 'разделов');
+            return true;
+        } catch (error) {
+            console.error('Sections sync error:', error);
+            return false;
+        }
+    }
+
+    // Проверка синхронизации
+    static checkSyncStatus() {
+        const adminProducts = JSON.parse(localStorage.getItem('adminProducts')) || [];
+        const shopProducts = JSON.parse(localStorage.getItem('products')) || [];
+        
+        console.log('Статус синхронизации:', {
+            adminProducts: adminProducts.length,
+            shopProducts: shopProducts.length,
+            synchronized: adminProducts.length === shopProducts.length
+        });
+        
+        return adminProducts.length === shopProducts.length;
+    }
 }
+
+// Автоматическая синхронизация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем и синхронизируем при необходимости
+    if (!DataSync.checkSyncStatus()) {
+        DataSync.syncProducts();
+        DataSync.syncSections();
+    }
+});
+
+// Экспортируем для глобального использования
+window.DataSync = DataSync;

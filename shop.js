@@ -12,11 +12,24 @@ function initializeApp() {
     initializeConsultationForm();
     setupRealTimeSync();
     initializeOrderProcessing();
-    initializeCartSidebar(); // Добавляем инициализацию корзины
+    initializeCartSidebar();
+    
+    // Слушатель обновлений товаров
+    window.addEventListener('productsUpdated', (event) => {
+        console.log('Товары обновлены через кастомное событие');
+        if (typeof initializeProducts === 'function') {
+            initializeProducts();
+        }
+    });
+    
+    // Слушатель обновлений разделов
+    window.addEventListener('sectionsUpdated', (event) => {
+        console.log('Разделы обновлены через кастомное событие');
+        if (typeof initializeFilters === 'function') {
+            initializeFilters();
+        }
+    });
 }
-
-// Products data - загружается из localStorage
-let productsData = [];
 
 // Инициализация боковой панели корзины
 function initializeCartSidebar() {
@@ -78,7 +91,7 @@ function initializeCartSidebar() {
     });
 }
 
-// Новый метод для синхронизации в реальном времени
+// Новая функция для синхронизации в реальном времени
 function setupRealTimeSync() {
     window.addEventListener('storage', (e) => {
         if (e.key === 'products' && e.newValue) {
@@ -266,19 +279,45 @@ function initializeProducts() {
     let currentPage = 1;
     let currentFilter = 'all';
 
-    // Получаем активные товары из localStorage
+    // Улучшенная функция получения товаров
     function getActiveProducts() {
         let products = [];
         
         try {
-            products = JSON.parse(localStorage.getItem('products')) || [];
+            // Пробуем сначала получить товары из админки
+            const adminProducts = JSON.parse(localStorage.getItem('adminProducts')) || [];
+            
+            if (adminProducts.length > 0) {
+                // Конвертируем товары из админки в формат магазина
+                products = adminProducts.map(product => ({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    category: product.category,
+                    section: product.section || 'all',
+                    description: product.description,
+                    badge: product.badge,
+                    active: product.active,
+                    featured: product.featured || false,
+                    stock: product.stock || 0,
+                    sku: product.sku,
+                    images: product.images || [],
+                    features: product.features || [],
+                    specifications: product.specifications || {},
+                    createdAt: product.createdAt,
+                    updatedAt: product.updatedAt
+                }));
+                
+                // Сохраняем синхронизированные товары
+                localStorage.setItem('products', JSON.stringify(products));
+                console.log('Товары загружены из админки:', products.length);
+            } else {
+                // Если в админке нет товаров, используем стандартные
+                products = JSON.parse(localStorage.getItem('products')) || [];
+                console.log('Товары загружены из магазина:', products.length);
+            }
         } catch (error) {
             console.error('Load products error:', error);
-            products = [];
-        }
-        
-        // Если нет товаров в localStorage, возвращаем пустой массив
-        if (products.length === 0) {
             products = [];
         }
         
@@ -489,7 +528,7 @@ function initializeProducts() {
     // Initialize filters
     function initializeFilters() {
         // Загружаем разделы из localStorage
-        const sections = JSON.parse(localStorage.getItem('sections')) || this.getDefaultSections();
+        const sections = JSON.parse(localStorage.getItem('sections')) || getDefaultSections();
         const filterContainer = document.querySelector('.catalog-filters');
         
         if (!filterContainer) return;
@@ -540,8 +579,22 @@ function initializeProducts() {
         ];
     }
 
+    // Обработка URL параметров
+    function handleUrlFilters() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category');
+        
+        if (category) {
+            const filterBtn = document.querySelector(`[data-filter="${category}"]`);
+            if (filterBtn) {
+                filterBtn.click();
+            }
+        }
+    }
+
     // Initial render
     renderProducts();
+    handleUrlFilters();
 }
 
 // Cart functionality
@@ -737,8 +790,8 @@ function removeFromCart(productId) {
 
 // Modal functionality
 function initializeModal() {
-    const modal = document.getElementById('quickViewModal');
-    const closeBtn = document.querySelector('.modal-close');
+    const modal = document.getElementById('productModal');
+    const closeBtn = document.getElementById('modalClose');
     
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
@@ -774,10 +827,10 @@ function showProductModal(productId) {
         return;
     }
     
-    const modal = document.getElementById('quickViewModal');
+    const modal = document.getElementById('productModal');
     if (!modal) return;
     
-    const modalContent = modal.querySelector('.modal-content');
+    const modalBody = document.getElementById('modalBody');
     
     // Format features and specifications
     const featuresHtml = product.features && product.features.length > 0 ? 
@@ -811,50 +864,39 @@ function showProductModal(productId) {
         `;
     }
     
-    modalContent.innerHTML = `
-        <button class="modal-close">
-            <i class="fas fa-times"></i>
-        </button>
-        <div class="modal-body">
-            <div class="modal-images">
-                ${imageContent}
+    modalBody.innerHTML = `
+        <div class="modal-images">
+            ${imageContent}
+        </div>
+        <div class="modal-info">
+            <h2>${product.name}</h2>
+            ${product.badge ? `<div class="product-badge">${product.badge}</div>` : ''}
+            <div class="modal-price">${formatPrice(product.price)}</div>
+            
+            <div class="product-description">
+                <p>${product.description || 'Описание товара отсутствует.'}</p>
             </div>
-            <div class="modal-info">
-                <h2>${product.name}</h2>
-                ${product.badge ? `<div class="product-badge">${product.badge}</div>` : ''}
-                <div class="modal-price">${formatPrice(product.price)}</div>
-                
-                <div class="product-description">
-                    <p>${product.description || 'Описание товара отсутствует.'}</p>
-                </div>
-                
-                <div class="product-features">
-                    <h4>Особенности:</h4>
-                    <ul>${featuresHtml}</ul>
-                </div>
-                
-                <div class="product-specifications">
-                    <h4>Характеристики:</h4>
-                    <div class="specs-list">${specsHtml}</div>
-                </div>
-                
-                <div class="modal-actions">
-                    <button class="btn btn-primary" onclick="addToCart(${product.id}); showNotification('Товар добавлен в корзину')">
-                        <i class="fas fa-shopping-cart"></i> В корзину
-                    </button>
-                    <button class="btn btn-outline">
-                        <i class="far fa-heart"></i>
-                    </button>
-                </div>
+            
+            <div class="product-features">
+                <h4>Особенности:</h4>
+                <ul>${featuresHtml}</ul>
+            </div>
+            
+            <div class="product-specifications">
+                <h4>Характеристики:</h4>
+                <div class="specs-list">${specsHtml}</div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="addToCart(${product.id}); showNotification('Товар добавлен в корзину')">
+                    <i class="fas fa-shopping-cart"></i> В корзину
+                </button>
+                <button class="btn btn-outline">
+                    <i class="far fa-heart"></i>
+                </button>
             </div>
         </div>
     `;
-    
-    // Re-attach close event
-    modalContent.querySelector('.modal-close').addEventListener('click', () => {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    });
     
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';

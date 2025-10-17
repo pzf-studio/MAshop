@@ -22,6 +22,7 @@ class AdminPanel {
         this.updateProductCounter();
         this.updateSectionsCounter();
         this.populateSectionSelect();
+        this.syncWithShop(); // Синхронизируем при инициализации
     }
 
     getDefaultSections() {
@@ -640,6 +641,7 @@ class AdminPanel {
         this.updateProductCounter();
         this.updateSectionsCounter();
         this.populateSectionSelect();
+        this.syncWithShop(); // Синхронизируем при обновлении
         this.showNotification('Данные обновлены', 'success');
     }
 
@@ -713,6 +715,9 @@ class AdminPanel {
     saveProducts() {
         localStorage.setItem('adminProducts', JSON.stringify(this.products));
         
+        console.log('Товары сохранены в админке:', this.products.length);
+        console.log('Активные товары:', this.products.filter(p => p.active).length);
+        
         // Мгновенное обновление интерфейса
         this.renderProductsTable();
         this.updateProductCounter();
@@ -722,6 +727,22 @@ class AdminPanel {
         
         // Принудительное событие storage для других вкладок
         this.triggerStorageEvent();
+        
+        // Дополнительно отправляем кастомное событие для главной страницы
+        window.dispatchEvent(new CustomEvent('adminProductsUpdated', {
+            detail: { 
+                totalProducts: this.products.length,
+                activeProducts: this.products.filter(p => p.active).length
+            }
+        }));
+        
+        // НОВОЕ: Специальное событие для главной страницы
+        window.dispatchEvent(new CustomEvent('productsDataChanged', {
+            detail: { 
+                source: 'admin',
+                products: this.products.filter(p => p.active)
+            }
+        }));
     }
 
     saveSections() {
@@ -749,6 +770,7 @@ class AdminPanel {
         }
     }
 
+    // НОВАЯ УЛУЧШЕННАЯ СИНХРОНИЗАЦИЯ
     syncWithShop() {
         const shopProducts = this.products.map(product => ({
             id: product.id,
@@ -773,15 +795,30 @@ class AdminPanel {
             localStorage.setItem('products', JSON.stringify(shopProducts));
             console.log('Товары синхронизированы с магазином:', shopProducts.length);
             
-            // Триггерим событие для обновления магазина
-            const event = new StorageEvent('storage', {
-                key: 'products',
-                newValue: JSON.stringify(shopProducts),
-                oldValue: localStorage.getItem('products')
+            // Создаем кастомное событие для мгновенного обновления
+            const event = new CustomEvent('productsUpdated', {
+                detail: { products: shopProducts }
             });
             window.dispatchEvent(event);
+            
+            // Также триггерим storage event для других вкладок
+            window.dispatchEvent(new StorageEvent('storage', {
+                key: 'products',
+                newValue: JSON.stringify(shopProducts)
+            }));
+            
+            // НОВОЕ: Специальное событие для главной страницы
+            window.dispatchEvent(new CustomEvent('indexProductsUpdate', {
+                detail: { 
+                    products: shopProducts.filter(p => p.active),
+                    timestamp: new Date().toISOString()
+                }
+            }));
+            
+            return true;
         } catch (error) {
             console.error('Ошибка синхронизации с магазином:', error);
+            return false;
         }
     }
 
@@ -791,14 +828,14 @@ class AdminPanel {
             localStorage.setItem('sections', JSON.stringify(activeSections));
             console.log('Разделы синхронизированы с магазином:', activeSections.length);
             
-            const event = new StorageEvent('storage', {
-                key: 'sections',
-                newValue: JSON.stringify(activeSections),
-                oldValue: localStorage.getItem('sections')
-            });
-            window.dispatchEvent(event);
+            window.dispatchEvent(new CustomEvent('sectionsUpdated', {
+                detail: { sections: activeSections }
+            }));
+            
+            return true;
         } catch (error) {
             console.error('Ошибка синхронизации разделов с магазином:', error);
+            return false;
         }
     }
 
