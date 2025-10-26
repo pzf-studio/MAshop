@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MA Furniture - Интернет-магазин элитной мебели</title>
+    <title>MA Furniture - Интернет-магазин мебели</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="shop.css">
@@ -33,7 +33,7 @@
                 </nav>
                 
                 <div class="header-actions">
-                    <!-- Добавлена иконка корзины -->
+                    <!-- Обновленная иконка корзины -->
                     <button class="cart-icon" id="cartIcon">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count" id="cartCount">0</span>
@@ -56,7 +56,7 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
-            <h1 class="hero-title">Каталог элитной мебели</h1>
+            <h1 class="hero-title">Каталог мебели</h1>
             <p class="hero-subtitle">Более 45 эксклюзивных моделей премиум-класса для вашего интерьера</p>
             <div class="hero-actions">
                 <a href="index.html" class="btn btn-outline">
@@ -148,55 +148,46 @@
         </div>
     </footer>
 
-    <!-- Product Quick View Modal -->
-    <div class="modal" id="productModal">
-        <div class="modal-content">
-            <button class="modal-close" id="modalClose">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="modal-body" id="modalBody">
-                <!-- Modal content will be added dynamically -->
-            </div>
-        </div>
-    </div>
 
-    <!-- Корзина -->
+    <!-- Новая корзина -->
     <div class="cart-overlay" id="cartOverlay">
         <div class="cart-sidebar">
             <div class="cart-header">
-                <h3 class="cart-title">Корзина</h3>
+                <h3 class="cart-title">
+                    <i class="fas fa-shopping-cart"></i>
+                    Корзина
+                </h3>
                 <button class="cart-close" id="cartClose">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             
             <div class="cart-content" id="cartContent">
-                <!-- Содержимое корзины будет добавляться динамически -->
+                <div class="cart-empty" id="cartEmpty">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h4>Корзина пуста</h4>
+                    <p>Добавьте товары из каталога</p>
+                </div>
+                <div class="cart-items" id="cartItems" style="display: none;"></div>
             </div>
             
-            <div class="cart-footer">
-                <div class="cart-total">
-                    <span>Итого:</span>
-                    <span class="cart-total-amount" id="cartTotalAmount">0 ₽</span>
-                </div>
-                <div class="cart-actions">
-                    <button class="btn-checkout" id="checkoutBtn">
-                        <i class="fas fa-shopping-bag"></i>
-                        Оформить заказ
-                    </button>
-                    <button class="btn-continue-shopping" id="continueShoppingBtn">
-                        Продолжить покупки
-                    </button>
+            <div class="cart-footer" id="cartFooter" style="display: none;">
+                <div class="cart-summary">
+                    <div class="cart-total">
+                        <span>Итого:</span>
+                        <span class="cart-total-amount" id="cartTotalAmount">0 ₽</span>
+                    </div>
+                    <div class="cart-actions">
+                        <button class="btn btn-primary btn-checkout" id="checkoutBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            Оформить заказ
+                        </button>
+                        <button class="btn btn-outline btn-continue" id="continueShoppingBtn">
+                            Продолжить покупки
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Notification -->
-    <div class="notification" id="notification">
-        <div class="notification-content">
-            <i class="fas fa-check-circle"></i>
-            <span id="notificationMessage">Товар добавлен в корзину</span>
         </div>
     </div>
 
