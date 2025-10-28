@@ -163,11 +163,28 @@ class CartSystem {
     }
     
     updateCartUI() {
+        const cartIcon = document.getElementById('cartIcon');
         const cartCount = document.getElementById('cartCount');
+        
         if (cartCount) {
             const totalItems = this.cart.reduce((sum, item) => sum + item.quantity, 0);
             cartCount.textContent = totalItems;
-            cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
+            
+            if (totalItems > 0) {
+                cartCount.classList.add('show');
+                // Добавляем анимацию при обновлении
+                cartCount.style.animation = 'none';
+                setTimeout(() => {
+                    cartCount.style.animation = 'cartBounce 0.5s ease';
+                }, 10);
+            } else {
+                cartCount.classList.remove('show');
+            }
+        }
+        
+        // Обновляем состояние корзины если она открыта
+        if (document.getElementById('cartOverlay')?.classList.contains('active')) {
+            this.renderCart();
         }
     }
     
