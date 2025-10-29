@@ -738,3 +738,76 @@
     background: #219a52;
     transform: translateY(-1px);
 }
+
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--admin-border);
+    border-top: 2px solid var(--admin-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Стили для уведомлений безопасности */
+.notification.security {
+    background: var(--admin-warning);
+}
+
+.notification.error {
+    background: var(--admin-danger);
+}
+
+/* Стили для кнопки выхода */
+.btn-logout {
+    background: var(--admin-danger);
+    color: white;
+}
+
+.btn-logout:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .admin-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .btn-logout {
+        margin-left: 0 !important;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Анимации */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(-10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.notification {
+    animation: fadeIn 0.3s ease;
+}
