@@ -378,43 +378,7 @@ function initializeProducts() {
     let currentFilter = 'all';
 
     function getActiveProducts() {
-        let products = [];
-        
-        try {
-            const adminProducts = JSON.parse(localStorage.getItem('adminProducts')) || [];
-            
-            if (adminProducts.length > 0) {
-                products = adminProducts.map(product => ({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    category: product.category,
-                    section: product.section || 'all',
-                    description: product.description,
-                    badge: product.badge,
-                    active: product.active,
-                    featured: product.featured || false,
-                    stock: product.stock || 0,
-                    sku: product.sku,
-                    images: product.images || [],
-                    features: product.features || [],
-                    specifications: product.specifications || {},
-                    createdAt: product.createdAt,
-                    updatedAt: product.updatedAt
-                }));
-                
-                localStorage.setItem('products', JSON.stringify(products));
-                console.log('Товары загружены из админки:', products.length);
-            } else {
-                products = JSON.parse(localStorage.getItem('products')) || [];
-                console.log('Товары загружены из магазина:', products.length);
-            }
-        } catch (error) {
-            console.error('Load products error:', error);
-            products = [];
-        }
-        
-        return products.filter(product => product.active === true);
+        return dataSync.getActiveProducts();
     }
 
     function renderProducts() {

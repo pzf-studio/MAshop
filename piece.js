@@ -20,8 +20,7 @@ function initializeProductPage() {
 }
 
 function loadProduct(productId) {
-    const products = JSON.parse(localStorage.getItem('products')) || [];
-    const product = products.find(p => p.id === productId);
+    const product = dataSync.getProductById(productId);
     
     if (!product) {
         showError('Товар не найден');
