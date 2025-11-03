@@ -10,6 +10,7 @@ class AdminPanel {
         this.products = [];
         this.sections = [];
         this.currentProductId = null;
+        this.currentSectionId = null;
         this.init();
     }
 
@@ -530,6 +531,7 @@ class AdminPanel {
             this.saveSections();
             this.renderSections();
             this.closeModal('sectionModal');
+            this.notifySectionsUpdate(); // Уведомляем об обновлении разделов
 
         } catch (error) {
             console.error('Save section error:', error);
@@ -625,6 +627,7 @@ class AdminPanel {
             this.sections = this.sections.filter(s => s.id !== this.sectionToDelete);
             this.saveSections();
             this.renderSections();
+            this.notifySectionsUpdate(); // Уведомляем об обновлении разделов
             this.showNotification('Раздел удален', 'success');
             this.sectionToDelete = null;
         }
@@ -654,6 +657,19 @@ class AdminPanel {
         
         console.log('Уведомление об обновлении товаров отправлено');
         this.showNotification('Изменения синхронизированы с магазином', 'success');
+    }
+
+    // 🔐 Уведомление об обновлении разделов
+    notifySectionsUpdate() {
+        // Отправляем кастомное событие
+        const event = new CustomEvent('adminSectionsUpdated');
+        window.dispatchEvent(event);
+        
+        // Также обновляем localStorage для cross-tab синхронизации
+        localStorage.setItem('adminSections', JSON.stringify(this.sections));
+        
+        console.log('Уведомление об обновлении разделов отправлено');
+        this.showNotification('Разделы синхронизированы с магазином', 'success');
     }
 }
 

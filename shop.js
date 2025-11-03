@@ -1,4 +1,3 @@
-// shop.js - Интернет-магазин MA Furniture
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
@@ -9,15 +8,12 @@ function initializeApp() {
     initializeCart();
     initializeMobileMenu();
     
-    window.addEventListener('productsUpdated', (event) => {
-        console.log('Товары обновлены через кастомное событие');
-        if (typeof initializeProducts === 'function') {
-            initializeProducts();
-        }
+    window.addEventListener('productsDataUpdated', () => {
+        console.log('Shop: Данные товаров обновлены');
+        initializeProducts();
     });
 }
 
-// Система корзины
 class CartSystem {
     constructor() {
         this.cart = JSON.parse(localStorage.getItem('ma_furniture_cart')) || [];
@@ -30,7 +26,6 @@ class CartSystem {
     }
     
     bindEvents() {
-        // Открытие/закрытие корзины
         const cartIcon = document.getElementById('cartIcon');
         const cartClose = document.getElementById('cartClose');
         const continueShoppingBtn = document.getElementById('continueShoppingBtn');
@@ -59,7 +54,6 @@ class CartSystem {
             });
         }
         
-        // Закрытие по Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && document.getElementById('cartOverlay')?.classList.contains('active')) {
                 this.closeCart();
@@ -172,7 +166,6 @@ class CartSystem {
             
             if (totalItems > 0) {
                 cartCount.classList.add('show');
-                // Добавляем анимацию при обновлении
                 cartCount.style.animation = 'none';
                 setTimeout(() => {
                     cartCount.style.animation = 'cartBounce 0.5s ease';
@@ -182,7 +175,6 @@ class CartSystem {
             }
         }
         
-        // Обновляем состояние корзины если она открыта
         if (document.getElementById('cartOverlay')?.classList.contains('active')) {
             this.renderCart();
         }
@@ -258,7 +250,6 @@ class CartSystem {
             cartTotalAmount.textContent = this.formatPrice(total);
         }
         
-        // Обновляем состояние кнопки оформления заказа
         const checkoutBtn = document.getElementById('checkoutBtn');
         if (checkoutBtn) {
             checkoutBtn.disabled = this.cart.length === 0;
@@ -291,7 +282,6 @@ class CartSystem {
         
         window.open(telegramUrl, '_blank');
         
-        // Очищаем корзину после оформления
         this.cart = [];
         this.saveCart();
         this.updateCartUI();
@@ -326,11 +316,9 @@ class CartSystem {
     }
     
     showNotification(message, type = 'success') {
-        // Удаляем существующие уведомления
         const existingNotifications = document.querySelectorAll('.notification');
         existingNotifications.forEach(notification => notification.remove());
         
-        // Создаем новое уведомление
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.innerHTML = `
@@ -342,10 +330,8 @@ class CartSystem {
         
         document.body.appendChild(notification);
         
-        // Показываем уведомление
         setTimeout(() => notification.classList.add('show'), 100);
         
-        // Скрываем через 3 секунды
         setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => notification.remove(), 300);
@@ -361,7 +347,6 @@ class CartSystem {
     }
 }
 
-// Глобальная переменная для корзины
 let cartSystem;
 
 function initializeCart() {
@@ -369,7 +354,6 @@ function initializeCart() {
     console.log('Cart system initialized');
 }
 
-// Products functionality
 function initializeProducts() {
     const productsGrid = document.getElementById('productsGrid');
     const pagination = document.getElementById('pagination');
@@ -377,12 +361,8 @@ function initializeProducts() {
     let currentPage = 1;
     let currentFilter = 'all';
 
-    function getActiveProducts() {
-        return dataSync.getActiveProducts();
-    }
-
     function renderProducts() {
-        const activeProducts = getActiveProducts();
+        let activeProducts = dataManager.getActiveProducts();
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         
@@ -404,6 +384,10 @@ function initializeProducts() {
                         <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                         <h3>Товары не найдены</h3>
                         <p>${activeProducts.length === 0 ? 'Нет активных товаров' : 'Нет товаров в выбранной категории'}</p>
+                        ${activeProducts.length === 0 ? 
+                            '<p><a href="admin/admin-login.html" style="color: #d4af37;">Добавьте товары в админ-панели</a></p>' : 
+                            ''
+                        }
                     </div>
                 `;
                 if (pagination) pagination.innerHTML = '';
@@ -435,48 +419,34 @@ function initializeProducts() {
             imageContent = `<img src="${product.images[0]}" alt="${product.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
         }
         
-        const fallbackContent = `
-            <div style="width: 100%; height: 100%; background: #f0f0f0; display: ${product.images && product.images.length > 0 ? 'none' : 'flex'}; align-items: center; justify-content: center; color: #666; font-size: 1.2rem;">
-                ${product.name}
-            </div>
-        `;
-        
         const productUrl = `piece.html?id=${product.id}`;
         
         card.innerHTML = `
             <div class="product-image">
                 ${imageContent}
-                ${fallbackContent}
+                <div class="image-placeholder" style="${product.images && product.images.length > 0 ? 'display: none;' : 'display: flex;'}">
+                    <i class="fas fa-couch"></i>
+                </div>
                 ${badge}
-                <a href="${productUrl}" class="product-link" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></a>
+                <a href="${productUrl}" class="product-link"></a>
             </div>
             <div class="product-info">
                 <h3 class="product-title">
-                    <a href="${productUrl}" style="color: inherit; text-decoration: none;">${product.name}</a>
+                    <a href="${productUrl}">${product.name}</a>
                 </h3>
-                <div class="product-rating">
-                    <div class="stars">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <span class="rating-count">(${Math.floor(Math.random() * 20) + 5} отзывов)</span>
+                <div class="product-description">
+                    ${product.description || 'Качественный товар от MA Furniture'}
                 </div>
                 <div class="product-price">
                     <span class="current-price">${formatPrice(product.price)}</span>
                 </div>
                 <div class="product-actions">
-                    <button class="btn btn-primary add-to-cart-btn" data-product='${JSON.stringify(product).replace(/'/g, "&apos;")}'>
+                    <button class="btn btn-primary add-to-cart-btn" data-product-id="${product.id}">
                         <i class="fas fa-shopping-cart"></i>
                         В корзину
                     </button>
-                    <button class="btn-wishlist">
-                        <i class="far fa-heart"></i>
-                    </button>
-                    <a href="${productUrl}" class="btn btn-outline" style="margin-left: auto;">
-                        <i class="fas fa-external-link-alt"></i>
+                    <a href="${productUrl}" class="btn btn-outline">
+                        <i class="fas fa-eye"></i>
                     </a>
                 </div>
             </div>
@@ -529,17 +499,17 @@ function initializeProducts() {
     }
 
     function attachProductEventListeners() {
-        // Add to cart buttons
         document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                const productData = JSON.parse(e.target.closest('.add-to-cart-btn').dataset.product.replace(/&apos;/g, "'"));
-                cartSystem.addToCart(productData);
+                const productId = parseInt(e.target.closest('.add-to-cart-btn').dataset.productId);
+                const product = dataManager.getProductById(productId);
+                if (product && cartSystem) {
+                    cartSystem.addToCart(product);
+                }
             });
         });
         
-        // Wishlist buttons
         document.querySelectorAll('.btn-wishlist').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -553,13 +523,12 @@ function initializeProducts() {
                     showNotification('Товар добавлен в избранное');
                 } else {
                     icon.style.color = '';
-                    showNotification('Товар удален из избранного');
+                    showNotification('Товар удален из избранное');
                 }
             });
         });
     }
 
-    // Initialize filters from existing HTML
     function initializeFilters() {
         const filterBtns = document.querySelectorAll('.filter-btn');
         
@@ -589,7 +558,6 @@ function initializeProducts() {
         }
     }
 
-    // Initialize filters and render products
     initializeFilters();
     renderProducts();
     handleUrlFilters();
@@ -647,6 +615,5 @@ function showNotification(message, type = 'success') {
     }, 3000);
 }
 
-// Глобальные функции для доступа из HTML
 window.formatPrice = formatPrice;
 window.showNotification = showNotification;

@@ -1,4 +1,3 @@
-// data-manager.js - Централизованное управление данными
 class DataManager {
     constructor() {
         this.products = [];
@@ -13,11 +12,9 @@ class DataManager {
 
     loadFromStorage() {
         try {
-            // Загружаем из админки
             const adminProducts = JSON.parse(localStorage.getItem('adminProducts')) || [];
             const adminSections = JSON.parse(localStorage.getItem('adminSections')) || [];
             
-            // Преобразуем в формат для магазина
             this.products = adminProducts.map(product => ({
                 id: product.id,
                 name: product.name,
@@ -39,7 +36,6 @@ class DataManager {
 
             this.sections = adminSections;
 
-            // Сохраняем в хранилище магазина для обратной совместимости
             localStorage.setItem('products', JSON.stringify(this.products));
             
             console.log(`DataManager: Загружено ${this.products.length} товаров, ${this.sections.length} разделов`);
@@ -52,7 +48,6 @@ class DataManager {
     }
 
     setupSync() {
-        // Слушаем изменения в localStorage
         window.addEventListener('storage', (e) => {
             if (e.key === 'adminProducts' || e.key === 'adminSections') {
                 console.log('DataManager: Обнаружены изменения в админ-панели');
@@ -61,7 +56,6 @@ class DataManager {
             }
         });
 
-        // Слушаем кастомные события
         window.addEventListener('adminProductsUpdated', () => {
             console.log('DataManager: Событие обновления товаров');
             this.loadFromStorage();
@@ -76,7 +70,6 @@ class DataManager {
         window.dispatchEvent(event);
     }
 
-    // Получение товаров
     getProducts() {
         return this.products;
     }
@@ -113,7 +106,6 @@ class DataManager {
         return this.sections.filter(section => section.active);
     }
 
-    // Поиск товаров
     searchProducts(query) {
         const searchTerm = query.toLowerCase();
         return this.getActiveProducts().filter(product =>
@@ -124,5 +116,4 @@ class DataManager {
     }
 }
 
-// Глобальный экземпляр
 const dataManager = new DataManager();
