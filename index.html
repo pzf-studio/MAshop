@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -34,10 +35,6 @@
                 </nav>
                 
                 <div class="header-actions">
-                    <button class="cart-btn" id="cartBtn">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count">0</span>
-                    </button>
                     <a href="https://t.me/Ma_Furniture_ru" class="btn btn-outline btn-telegram">
                         <i class="fab fa-telegram-plane"></i>
                         <span>Telegram</span>
@@ -104,7 +101,7 @@
             <div class="shop-grid">
                 <div class="shop-card">
                     <div class="shop-card-image">
-                        <i class="fas fa-tshirt" style="font-size: 3rem;"></i>
+                        <img src="./images/1.png" alt="Электрические пантографы">
                     </div>
                     <div class="shop-card-content">
                         <h3>Электрические пантографы</h3>
@@ -118,7 +115,7 @@
                 
                 <div class="shop-card">
                     <div class="shop-card-image">
-                        <i class="fas fa-archive" style="font-size: 3rem;"></i>
+                        <img src="./images/2.jpeg" alt="Системы хранения">
                     </div>
                     <div class="shop-card-content">
                         <h3>Системы хранения</h3>
@@ -132,7 +129,7 @@
                 
                 <div class="shop-card">
                     <div class="shop-card-image">
-                        <i class="fas fa-shoe-prints" style="font-size: 3rem;"></i>
+                        <img src="./images/3.jpg" alt="Обувницы">
                     </div>
                     <div class="shop-card-content">
                         <h3>Обувницы</h3>
@@ -348,92 +345,6 @@
         </div>
     </footer>
 
-    <!-- Корзина -->
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <h3>Корзина</h3>
-            <button class="cart-close" id="cartClose">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="cart-items" id="cartItems">
-            <!-- Товары корзины -->
-        </div>
-        <div class="cart-footer">
-            <div class="cart-total">
-                <span>Итого:</span>
-                <span class="total-price">0 ₽</span>
-            </div>
-            <button class="btn btn-primary btn-checkout">Оформить заказ</button>
-        </div>
-    </div>
-
-    <script>
-        // Базовая инициализация корзины для главной страницы
-        document.addEventListener('DOMContentLoaded', function() {
-            // Инициализация корзины
-            updateCartUI();
-            
-            // Обработчики для корзины
-            const cartBtn = document.getElementById('cartBtn');
-            const cartSidebar = document.getElementById('cartSidebar');
-            const cartClose = document.getElementById('cartClose');
-            
-            if (cartBtn && cartSidebar) {
-                cartBtn.addEventListener('click', () => {
-                    cartSidebar.classList.add('active');
-                });
-            }
-            
-            if (cartClose && cartSidebar) {
-                cartClose.addEventListener('click', () => {
-                    cartSidebar.classList.remove('active');
-                });
-            }
-            
-            function updateCartUI() {
-                const cart = JSON.parse(localStorage.getItem('cart')) || [];
-                const cartCount = document.querySelector('.cart-count');
-                const totalPrice = document.querySelector('.total-price');
-                const cartItems = document.getElementById('cartItems');
-                
-                // Обновляем счетчик
-                if (cartCount) {
-                    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-                    cartCount.textContent = totalItems;
-                }
-                
-                // Обновляем общую сумму
-                if (totalPrice) {
-                    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                    totalPrice.textContent = total.toLocaleString() + ' ₽';
-                }
-                
-                // Обновляем список товаров
-                if (cartItems) {
-                    if (cart.length === 0) {
-                        cartItems.innerHTML = '<p class="empty-cart">Корзина пуста</p>';
-                    } else {
-                        cartItems.innerHTML = cart.map(item => `
-                            <div class="cart-item">
-                                <div class="cart-item-info">
-                                    <h4>${item.name}</h4>
-                                    <p>${item.price.toLocaleString()} ₽ × ${item.quantity}</p>
-                                </div>
-                            </div>
-                        `).join('');
-                    }
-                }
-            }
-            
-            // Слушаем изменения в корзине
-            window.addEventListener('storage', function(e) {
-                if (e.key === 'cart') {
-                    updateCartUI();
-                }
-            });
-        });
-    </script>
     <script src="sync.js"></script>
     <script src="init.js"></script>
     <script src="data-manager.js"></script>
