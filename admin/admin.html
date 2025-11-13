@@ -6,8 +6,8 @@
     <title>Админ-панель - MA Furniture</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="admin.css">
-    <script src="admin-auth.js"></script>
+    <link rel="stylesheet" href="/admin.css">
+    <script src="/admin-auth.js"></script>
     <style>
         /* Индикатор загрузки для всей страницы */
         .page-loading {
@@ -73,10 +73,10 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Название</th>
-                                    <th>Категория</th>
                                     <th>Раздел</th>
                                     <th>Цена</th>
                                     <th>Бейдж</th>
+                                    <th>Цвета</th>
                                     <th>Статус</th>
                                     <th>Действия</th>
                                 </tr>
@@ -164,21 +164,11 @@
                             </div>
                             
                             <div class="form-group">
-                                <label for="productCategory">Категория *</label>
-                                <select id="productCategory" required>
-                                    <option value="">Выберите категорию</option>
-                                    <option value="pantograph">Пантографы</option>
-                                    <option value="wardrobe">Гардеробные системы</option>
-                                    <option value="premium">Премиум коллекция</option>
+                                <label for="productSection">Раздел *</label>
+                                <select id="productSection" required>
+                                    <option value="">Выберите раздел</option>
                                 </select>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="productSection">Раздел *</label>
-                            <select id="productSection" required>
-                                <!-- Sections will be loaded dynamically -->
-                            </select>
                         </div>
                         
                         <div class="form-row">
@@ -190,6 +180,34 @@
                             <div class="form-group">
                                 <label for="productStock">Количество на складе</label>
                                 <input type="number" id="productStock" min="0" value="0">
+                            </div>
+                        </div>
+
+                        <!-- НОВАЯ СИСТЕМА: Несколько цветов -->
+                        <div class="form-group">
+                            <label for="productColors">Система "Несколько цветов"</label>
+                            <div class="colors-selector">
+                                <label class="color-option">
+                                    <input type="checkbox" id="enableMultipleColors"> 
+                                    Включить систему нескольких цветов
+                                </label>
+                                
+                                <div class="colors-container" id="colorsContainer" style="display: none;">
+                                    <div class="colors-header">
+                                        <h4>Управление цветами</h4>
+                                        <button type="button" class="btn btn-outline btn-small" id="addColorBtn">
+                                            <i class="fas fa-plus"></i> Добавить цвет
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="colors-variants-list" id="colorsVariantsList">
+                                        <!-- Варианты цветов будут добавляться здесь -->
+                                    </div>
+                                    
+                                    <div class="colors-info">
+                                        <small>Максимум 10 цветов. Для каждого цвета можно задать название, выбрать цвет из палитры и загрузить индивидуальные фотографии.</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -238,8 +256,9 @@
                                 </div>
                                 <input type="file" id="productImages" multiple accept="image/*" style="display: none;">
                                 <button type="button" class="btn btn-outline" id="uploadImagesBtn">
-                                    <i class="fas fa-upload"></i> Загрузить фото
+                                    <i class="fas fa-upload"></i> Загрузить фото (макс. 5)
                                 </button>
+                                <small>Можно загрузить до 5 изображений. Первое изображение будет основным.</small>
                             </div>
                         </div>
 
@@ -376,7 +395,7 @@
         </div>
     </div>
 
-    <script src="admin.js"></script>
+    <script src="/admin.js"></script>
 
     <script>
         // Показываем индикатор загрузки при переходе между страницами

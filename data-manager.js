@@ -55,9 +55,32 @@ class DataManager {
                 console.log('DataManager: Нет данных о товарах, инициализируем демо-данные');
                 this.initializeDemoData();
             }
+            
+            // Загружаем разделы из админки
+            this.loadSections();
         } catch (error) {
             console.error('DataManager: Ошибка загрузки из localStorage:', error);
             this.initializeDemoData();
+        }
+    }
+    
+    loadSections() {
+        try {
+            this.sections = JSON.parse(localStorage.getItem('adminSections')) || [];
+            if (this.sections.length === 0) {
+                // Создаем базовые разделы, если их нет
+                this.sections = [
+                    { id: 1, name: 'Пантографы', code: 'pantograph', product_count: 0, active: true },
+                    { id: 2, name: 'Nuomi Hera', code: 'nuomi-hera', product_count: 0, active: true },
+                    { id: 3, name: 'Nuomi Ralphie', code: 'nuomi-ralphie', product_count: 0, active: true },
+                    { id: 4, name: 'Коллекция Wise', code: 'wise', product_count: 0, active: true },
+                    { id: 5, name: 'Коллекция Time', code: 'time', product_count: 0, active: true },
+                    { id: 6, name: 'Кухонные лифты', code: 'kitchen', product_count: 0, active: true }
+                ];
+                this.saveSections();
+            }
+        } catch (error) {
+            console.error('DataManager: Ошибка загрузки разделов:', error);
         }
     }
 
@@ -66,7 +89,6 @@ class DataManager {
             id: product.id,
             name: product.name,
             price: product.price,
-            category: product.category,
             section: product.section || 'all',
             description: product.description || 'Описание товара',
             badge: product.badge,
@@ -74,9 +96,18 @@ class DataManager {
             featured: product.featured || false,
             stock: product.stock || 0,
             sku: product.sku || `MF-${product.id}`,
-            images: product.images || [],
+            images: product.images || [], // Теперь может содержать до 5 изображений
             features: Array.isArray(product.features) ? product.features : [],
             specifications: typeof product.specifications === 'object' ? product.specifications : {},
+            multipleColors: product.multipleColors || false,
+            colorsCount: product.colorsCount || 1,
+            isColorVariant: product.isColorVariant || false,
+            originalProductId: product.originalProductId || null,
+            colorIndex: product.colorIndex || null,
+            // НОВЫЕ ПОЛЯ ДЛЯ СИСТЕМЫ ЦВЕТОВ
+            colorVariants: product.colorVariants || [],
+            colorName: product.colorName || null,
+            colorHex: product.colorHex || null,
             createdAt: product.createdAt || new Date().toISOString(),
             updatedAt: product.updatedAt || new Date().toISOString()
         }));
@@ -88,8 +119,7 @@ class DataManager {
                 id: 1,
                 name: 'Электрический пантограф премиум',
                 price: 45000,
-                category: 'pantograph',
-                section: 'premium',
+                section: 'pantograph',
                 description: 'Электрический пантограф с сенсорным управлением в премиальной отделке',
                 badge: 'Хит продаж',
                 active: true,
@@ -103,6 +133,24 @@ class DataManager {
                     'Цвет': 'Хром',
                     'Нагрузка': 'до 25 кг'
                 },
+                multipleColors: true,
+                colorVariants: [
+                    {
+                        name: 'Серебристый',
+                        hex: '#cccccc',
+                        images: ['./images/1.png'],
+                        index: 1
+                    },
+                    {
+                        name: 'Золотистый',
+                        hex: '#FFD700',
+                        images: ['./images/1.png'],
+                        index: 2
+                    }
+                ],
+                isColorVariant: false,
+                originalProductId: null,
+                colorIndex: null,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             },
@@ -110,8 +158,7 @@ class DataManager {
                 id: 2,
                 name: 'Система хранения гардеробная',
                 price: 25000,
-                category: 'wardrobe',
-                section: 'classic',
+                section: 'wise',
                 description: 'Ящики и органайзеры с корпусами из анодированного алюминия',
                 badge: 'Новинка',
                 active: true,
@@ -125,13 +172,53 @@ class DataManager {
                     'Размеры': '60x40x20 см',
                     'Вес': '12 кг'
                 },
+                multipleColors: false,
+                colorsCount: 1,
+                isColorVariant: false,
+                originalProductId: null,
+                colorIndex: null,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             }
         ];
         
+        // Добавляем варианты цветов для демо-товара
+        this.createDemoColorVariants();
+        
         this.saveToLocalStorage();
         console.log('DataManager: Инициализированы демо-данные');
+    }
+
+    createDemoColorVariants() {
+        const mainProduct = this.products[0]; // Первый товар с multipleColors: true
+        
+        if (mainProduct.colorVariants && mainProduct.colorVariants.length > 0) {
+            mainProduct.colorVariants.forEach((colorVariant, index) => {
+                const variant = {
+                    ...mainProduct,
+                    id: this.generateProductId(),
+                    name: `${mainProduct.name} - ${colorVariant.name}`,
+                    sku: `${mainProduct.sku}_${index + 1}`,
+                    isColorVariant: true,
+                    originalProductId: mainProduct.id,
+                    colorIndex: index + 1,
+                    colorName: colorVariant.name,
+                    colorHex: colorVariant.hex,
+                    images: colorVariant.images,
+                    multipleColors: false,
+                    colorsCount: 1,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                
+                this.products.push(variant);
+            });
+        }
+    }
+
+    generateProductId() {
+        const maxId = this.products.reduce((max, product) => Math.max(max, product.id), 0);
+        return maxId + 1;
     }
 
     saveToLocalStorage() {
@@ -141,12 +228,27 @@ class DataManager {
             console.error('DataManager: Ошибка сохранения в localStorage:', error);
         }
     }
+    
+    saveSections() {
+        try {
+            localStorage.setItem('adminSections', JSON.stringify(this.sections));
+        } catch (error) {
+            console.error('DataManager: Ошибка сохранения разделов:', error);
+        }
+    }
 
     setupSync() {
         // Слушаем события обновления из админ-панели
         window.addEventListener('adminProductsUpdated', () => {
             console.log('DataManager: Обнаружено обновление в админ-панели');
             this.loadFromLocalStorage();
+            this.notifyUpdate();
+        });
+        
+        // Слушаем обновления разделов
+        window.addEventListener('adminSectionsUpdated', () => {
+            console.log('DataManager: Обновлены разделы');
+            this.loadSections();
             this.notifyUpdate();
         });
 
@@ -160,7 +262,7 @@ class DataManager {
 
     notifyUpdate() {
         const event = new CustomEvent('productsDataUpdated', {
-            detail: { products: this.products }
+            detail: { products: this.products, sections: this.sections }
         });
         window.dispatchEvent(event);
     }
@@ -175,10 +277,6 @@ class DataManager {
 
     getProductById(id) {
         return this.products.find(product => product.id === parseInt(id));
-    }
-
-    getProductsByCategory(category) {
-        return this.getActiveProducts().filter(product => product.category === category);
     }
 
     getProductsBySection(section) {
@@ -197,6 +295,29 @@ class DataManager {
         
         const shuffled = [...activeProducts].sort(() => 0.5 - Math.random());
         return shuffled.slice(0, limit);
+    }
+
+    // Новый метод: получение вариантов цветов для товара
+    getColorVariants(productId) {
+        return this.products.filter(product => 
+            product.isColorVariant && 
+            product.originalProductId === productId && 
+            product.active
+        );
+    }
+
+    // Новый метод: получение основного товара для варианта
+    getMainProduct(variantId) {
+        const variant = this.getProductById(variantId);
+        if (variant && variant.isColorVariant) {
+            return this.getProductById(variant.originalProductId);
+        }
+        return null;
+    }
+    
+    // Новый метод: получение активных разделов
+    getActiveSections() {
+        return this.sections.filter(section => section.active);
     }
 
     async submitOrder(orderData) {

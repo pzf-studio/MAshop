@@ -1,4 +1,3 @@
-// piece.js - Страница товара MA Furniture
 document.addEventListener('DOMContentLoaded', function() {
     initializeProductPage();
     initializeCart();
@@ -20,7 +19,7 @@ function initializeProductPage() {
 }
 
 function loadProduct(productId) {
-    const product = dataSync.getProductById(productId);
+    const product = dataManager.getProductById(productId);
     
     if (!product) {
         showError('Товар не найден');
@@ -32,6 +31,10 @@ function loadProduct(productId) {
 
 function renderProductDetails(product) {
     const container = document.getElementById('productDetails');
+    
+    // Проверяем, есть ли варианты цветов
+    const colorVariants = dataManager.getColorVariants(product.id);
+    const hasColorVariants = colorVariants.length > 0;
     
     // Форматируем характеристики
     const specsHtml = product.specifications && Object.keys(product.specifications).length > 0 ? 
@@ -48,7 +51,7 @@ function renderProductDetails(product) {
         product.features.map(feature => `<li>${feature}</li>`).join('') : 
         '<li>Информация отсутствует</li>';
     
-    // Создаем галерею изображений
+    // Создаем галерею изображений с поддержкой до 5 изображений
     let galleryHtml = '';
     if (product.images && product.images.length > 0) {
         galleryHtml = `
@@ -56,7 +59,7 @@ function renderProductDetails(product) {
                 <div class="gallery-main">
                     ${product.images.map((img, index) => `
                         <div class="gallery-slide ${index === 0 ? 'active' : ''}">
-                            <img src="${img}" alt="${product.name}">
+                            <img src="${img}" alt="${product.name} - изображение ${index + 1}">
                         </div>
                     `).join('')}
                 </div>
@@ -64,7 +67,7 @@ function renderProductDetails(product) {
                     <div class="gallery-thumbs">
                         ${product.images.map((img, index) => `
                             <div class="thumb ${index === 0 ? 'active' : ''}" data-index="${index}">
-                                <img src="${img}" alt="${product.name}">
+                                <img src="${img}" alt="${product.name} - миниатюра ${index + 1}">
                             </div>
                         `).join('')}
                     </div>
@@ -85,6 +88,38 @@ function renderProductDetails(product) {
         `;
     }
     
+    // НОВАЯ СИСТЕМА: Селектор цветов
+    let colorSelectorHtml = '';
+    if (hasColorVariants) {
+        const mainProductColor = {
+            id: product.id,
+            name: 'Основной',
+            hex: product.colorHex || '#cccccc',
+            images: product.images || []
+        };
+        
+        const allColorOptions = [mainProductColor, ...colorVariants];
+        
+        colorSelectorHtml = `
+            <div class="color-selector">
+                <h4>Выберите цвет:</h4>
+                <div class="color-options">
+                    ${allColorOptions.map((colorOption, index) => `
+                        <div class="color-option ${index === 0 ? 'active' : ''}" 
+                             data-product-id="${colorOption.id}" 
+                             data-color-hex="${colorOption.hex}">
+                            <div class="color-sample" style="background-color: ${colorOption.hex}; 
+                                 ${colorOption.hex === '#ffffff' ? 'border: 1px solid #ddd;' : ''}">
+                                ${colorOption.hex === '#ffffff' ? '<div style="color: #666; font-size: 0.6rem;">Цвет</div>' : ''}
+                            </div>
+                            <span>${colorOption.name}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
     container.innerHTML = `
         <div class="product-layout">
             ${galleryHtml}
@@ -98,6 +133,9 @@ function renderProductDetails(product) {
                 <div class="product-price">
                     <span class="current-price">${formatPrice(product.price)}</span>
                 </div>
+                
+                <!-- НОВАЯ СИСТЕМА: Селектор цветов -->
+                ${colorSelectorHtml}
                 
                 <div class="product-meta">
                     <div class="meta-item">
@@ -151,6 +189,171 @@ function renderProductDetails(product) {
     
     // Инициализируем обработчики событий
     initializeProductEventListeners(product);
+    
+    // Инициализируем выбор цвета
+    if (hasColorVariants) {
+        initializeColorSelector(product.id, colorVariants);
+    }
+}
+
+function initializeColorSelector(mainProductId, variants) {
+    const colorOptions = document.querySelectorAll('.color-option');
+    let currentProductId = mainProductId;
+    
+    colorOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const selectedProductId = parseInt(option.dataset.productId);
+            
+            // Если уже выбран этот вариант, ничего не делаем
+            if (selectedProductId === currentProductId) return;
+            
+            // Убираем активный класс у всех вариантов
+            colorOptions.forEach(opt => opt.classList.remove('active'));
+            // Добавляем активный класс выбранному варианту
+            option.classList.add('active');
+            
+            currentProductId = selectedProductId;
+            
+            // Если выбран не основной товар, загружаем данные варианта
+            if (selectedProductId !== mainProductId) {
+                const selectedVariant = variants.find(v => v.id === selectedProductId);
+                if (selectedVariant) {
+                    updateProductDisplay(selectedVariant);
+                }
+            } else {
+                // Возвращаемся к основному товару
+                const mainProduct = dataManager.getProductById(mainProductId);
+                updateProductDisplay(mainProduct);
+            }
+        });
+    });
+}
+
+function updateProductDisplay(product) {
+    // Обновляем название
+    const titleElement = document.querySelector('.product-header h1');
+    if (titleElement) {
+        titleElement.textContent = product.name;
+    }
+    
+    // Обновляем цену
+    const priceElement = document.querySelector('.product-price .current-price');
+    if (priceElement) {
+        priceElement.textContent = formatPrice(product.price);
+    }
+    
+    // Обновляем артикул
+    const skuElement = document.querySelector('.meta-item .meta-value');
+    if (skuElement && product.sku) {
+        skuElement.textContent = product.sku;
+    }
+    
+    // Обновляем наличие
+    const stockElement = document.querySelector('.meta-item .meta-value');
+    if (stockElement) {
+        const isInStock = (product.stock || 0) > 0;
+        stockElement.className = `meta-value ${isInStock ? 'in-stock' : 'out-of-stock'}`;
+        stockElement.textContent = isInStock ? 'В наличии' : 'Нет в наличии';
+    }
+    
+    // Обновляем описание
+    const descriptionElement = document.querySelector('.product-description p');
+    if (descriptionElement && product.description) {
+        descriptionElement.textContent = product.description;
+    }
+    
+    // Обновляем особенности
+    const featuresElement = document.querySelector('.product-features ul');
+    if (featuresElement && product.features) {
+        const featuresHtml = product.features && product.features.length > 0 ? 
+            product.features.map(feature => `<li>${feature}</li>`).join('') : 
+            '<li>Информация отсутствует</li>';
+        featuresElement.innerHTML = featuresHtml;
+    }
+    
+    // Обновляем характеристики
+    const specsElement = document.querySelector('.specs-list');
+    if (specsElement && product.specifications) {
+        const specsHtml = product.specifications && Object.keys(product.specifications).length > 0 ? 
+            Object.entries(product.specifications).map(([key, value]) => `
+                <div class="spec-row">
+                    <span class="spec-key">${key}:</span>
+                    <span class="spec-value">${value}</span>
+                </div>
+            `).join('') : 
+            '<div class="spec-row">Информация отсутствует</div>';
+        specsElement.innerHTML = specsHtml;
+    }
+    
+    // Обновляем кнопку добавления в корзину
+    const addToCartBtn = document.querySelector('.btn-add-to-cart');
+    if (addToCartBtn) {
+        const isInStock = (product.stock || 0) > 0;
+        addToCartBtn.disabled = !isInStock;
+        addToCartBtn.dataset.product = product.id;
+        addToCartBtn.innerHTML = `<i class="fas fa-shopping-cart"></i> ${isInStock ? 'Добавить в корзину' : 'Нет в наличии'}`;
+    }
+    
+    // Обновляем максимальное количество
+    const quantityInput = document.querySelector('.quantity-input');
+    if (quantityInput) {
+        quantityInput.max = product.stock || 1;
+        if (parseInt(quantityInput.value) > (product.stock || 1)) {
+            quantityInput.value = product.stock || 1;
+        }
+    }
+    
+    // Обновляем изображения
+    updateProductGallery(product.images);
+}
+
+function updateProductGallery(images) {
+    const galleryMain = document.querySelector('.gallery-main');
+    const galleryThumbs = document.querySelector('.gallery-thumbs');
+    
+    if (galleryMain) {
+        if (images && images.length > 0) {
+            galleryMain.innerHTML = images.map((img, index) => `
+                <div class="gallery-slide ${index === 0 ? 'active' : ''}">
+                    <img src="${img}" alt="${document.querySelector('.product-header h1')?.textContent || 'Товар'}">
+                </div>
+            `).join('');
+            
+            if (galleryThumbs && images.length > 1) {
+                galleryThumbs.innerHTML = images.map((img, index) => `
+                    <div class="thumb ${index === 0 ? 'active' : ''}" data-index="${index}">
+                        <img src="${img}" alt="${document.querySelector('.product-header h1')?.textContent || 'Товар'}">
+                    </div>
+                `).join('');
+                
+                initializeGallery();
+            } else if (galleryThumbs) {
+                galleryThumbs.innerHTML = '';
+            }
+        } else {
+            galleryMain.innerHTML = `
+                <div class="gallery-slide active">
+                    <div style="width: 100%; height: 400px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #666;">
+                        ${document.querySelector('.product-header h1')?.textContent || 'Товар'}
+                    </div>
+                </div>
+            `;
+            if (galleryThumbs) {
+                galleryThumbs.innerHTML = '';
+            }
+        }
+    }
+}
+
+function getColorHex(colorIndex) {
+    const colors = {
+        1: 'FF6B6B', // Красный
+        2: '4ECDC4', // Бирюзовый
+        3: '45B7D1', // Синий
+        4: '96CEB4', // Зеленый
+        5: 'FFEAA7'  // Желтый
+    };
+    return colors[colorIndex] || 'CCCCCC';
 }
 
 function initializeGallery() {
@@ -178,55 +381,64 @@ function initializeProductEventListeners(product) {
     const minusBtn = document.querySelector('.quantity-btn.minus');
     const plusBtn = document.querySelector('.quantity-btn.plus');
     
-    minusBtn.addEventListener('click', () => {
-        const currentValue = parseInt(quantityInput.value);
-        if (currentValue > 1) {
-            quantityInput.value = currentValue - 1;
-        }
-    });
-    
-    plusBtn.addEventListener('click', () => {
-        const currentValue = parseInt(quantityInput.value);
-        const maxStock = product.stock || 1;
-        if (currentValue < maxStock) {
-            quantityInput.value = currentValue + 1;
-        }
-    });
+    if (minusBtn && plusBtn && quantityInput) {
+        minusBtn.addEventListener('click', () => {
+            const currentValue = parseInt(quantityInput.value);
+            if (currentValue > 1) {
+                quantityInput.value = currentValue - 1;
+            }
+        });
+        
+        plusBtn.addEventListener('click', () => {
+            const currentValue = parseInt(quantityInput.value);
+            const maxStock = product.stock || 1;
+            if (currentValue < maxStock) {
+                quantityInput.value = currentValue + 1;
+            }
+        });
+    }
     
     // Add to cart button
     const addToCartBtn = document.querySelector('.btn-add-to-cart');
-    addToCartBtn.addEventListener('click', () => {
-        const quantity = parseInt(quantityInput.value);
-        addToCart(product.id, quantity);
-        showNotification('Товар добавлен в корзину');
-    });
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', () => {
+            const quantity = parseInt(document.querySelector('.quantity-input')?.value || 1);
+            const currentProductId = parseInt(addToCartBtn.dataset.product);
+            addToCart(currentProductId, quantity);
+            showNotification('Товар добавлен в корзину');
+        });
+    }
     
     // Wishlist button
     const wishlistBtn = document.querySelector('.btn-wishlist');
-    wishlistBtn.addEventListener('click', () => {
-        wishlistBtn.classList.toggle('active');
-        wishlistBtn.querySelector('i').classList.toggle('far');
-        wishlistBtn.querySelector('i').classList.toggle('fas');
-        
-        if (wishlistBtn.classList.contains('active')) {
-            wishlistBtn.style.color = '#d4af37';
-            showNotification('Товар добавлен в избранное');
-        } else {
-            wishlistBtn.style.color = '';
-            showNotification('Товар удален из избранного');
-        }
-    });
+    if (wishlistBtn) {
+        wishlistBtn.addEventListener('click', () => {
+            wishlistBtn.classList.toggle('active');
+            const icon = wishlistBtn.querySelector('i');
+            icon.classList.toggle('far');
+            icon.classList.toggle('fas');
+            
+            if (wishlistBtn.classList.contains('active')) {
+                wishlistBtn.style.color = '#d4af37';
+                showNotification('Товар добавлен в избранное');
+            } else {
+                wishlistBtn.style.color = '';
+                showNotification('Товар удален из избранного');
+            }
+        });
+    }
 }
 
 function loadRelatedProducts(currentProductId) {
-    const products = JSON.parse(localStorage.getItem('products')) || [];
+    const products = dataManager.getActiveProducts();
     const currentProduct = products.find(p => p.id === currentProductId);
     
     if (!currentProduct) return;
     
-    // Фильтруем связанные товары (той же категории, исключая текущий)
+    // Фильтруем связанные товары (той же категории, исключая текущий и его варианты)
     const relatedProducts = products
         .filter(p => p.id !== currentProductId && 
+                    !p.isColorVariant &&
                     p.category === currentProduct.category && 
                     p.active === true)
         .slice(0, 4); // Максимум 4 товара
@@ -236,6 +448,8 @@ function loadRelatedProducts(currentProductId) {
 
 function renderRelatedProducts(products) {
     const container = document.getElementById('relatedProducts');
+    
+    if (!container) return;
     
     if (products.length === 0) {
         container.innerHTML = `
@@ -303,15 +517,15 @@ function attachRelatedProductsEventListeners() {
     // Wishlist buttons
     document.querySelectorAll('#relatedProducts .btn-wishlist').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            e.target.classList.toggle('far');
-            e.target.classList.toggle('fas');
-            e.target.classList.toggle('active');
+            const icon = e.target.querySelector('i') || e.target;
+            icon.classList.toggle('far');
+            icon.classList.toggle('fas');
             
-            if (e.target.classList.contains('fas')) {
-                e.target.style.color = '#d4af37';
+            if (icon.classList.contains('fas')) {
+                icon.style.color = '#d4af37';
                 showNotification('Товар добавлен в избранное');
             } else {
-                e.target.style.color = '';
+                icon.style.color = '';
                 showNotification('Товар удален из избранного');
             }
         });
@@ -423,7 +637,7 @@ function initializeCart() {
     }
     
     function addToCart(productId, quantity = 1) {
-        const products = JSON.parse(localStorage.getItem('products')) || [];
+        const products = dataManager.getProducts();
         const product = products.find(p => p.id === productId);
         
         if (!product) {
@@ -556,7 +770,7 @@ function showNotification(message, type = 'success') {
 
 // Product modal functionality (for quick view from related products)
 function showProductModal(productId) {
-    const products = JSON.parse(localStorage.getItem('products')) || [];
+    const products = dataManager.getProducts();
     const product = products.find(p => p.id === productId);
     
     if (!product) {

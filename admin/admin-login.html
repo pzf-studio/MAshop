@@ -172,7 +172,7 @@
         </div>
     </div>
 
-    <script src="admin-auth.js"></script>
+    <script src="/admin-auth.js"></script>
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -211,7 +211,7 @@
                     
                     // Задержка для UX
                     setTimeout(() => {
-                        window.location.href = 'admin.html';
+                        window.location.href = '/admin.html';
                     }, 500);
                     
                 } else {
@@ -242,7 +242,7 @@
 
         // 🔐 Проверка существующей сессии
         if (adminAuth.validateSession()) {
-            window.location.href = 'admin.html';
+            window.location.href = '/admin.html';
         }
     </script>
 </body>

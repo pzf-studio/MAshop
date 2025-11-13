@@ -12,6 +12,12 @@ function initializeApp() {
         console.log('Shop: Данные товаров обновлены');
         initializeProducts();
     });
+    
+    // Слушаем обновления разделов из админки
+    window.addEventListener('adminSectionsUpdated', () => {
+        console.log('Shop: Разделы обновлены');
+        initializeProducts();
+    });
 }
 
 class CartSystem {
@@ -123,7 +129,7 @@ class CartSystem {
             
             if (item.quantity > 99) {
                 item.quantity = 99;
-                this.showNotification('Максимальное количество товара - 99 шт.', 'error');
+                this.showNotification('Максимум 99 шт.', 'error');
             }
             
             this.saveCart();
@@ -142,7 +148,7 @@ class CartSystem {
             
             if (quantity > 99) {
                 quantity = 99;
-                this.showNotification('Максимальное количество товара - 99 шт.', 'error');
+                this.showNotification('Максимум 99 шт.', 'error');
             }
             
             item.quantity = quantity;
@@ -369,7 +375,7 @@ function initializeProducts() {
         let filteredProducts = activeProducts;
         if (currentFilter !== 'all') {
             filteredProducts = activeProducts.filter(product => 
-                product.section === currentFilter || product.category === currentFilter
+                product.section === currentFilter
             );
         }
         
@@ -383,7 +389,7 @@ function initializeProducts() {
                     <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #666;">
                         <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                         <h3>Товары не найдены</h3>
-                        <p>${activeProducts.length === 0 ? 'Нет активных товаров' : 'Нет товаров в выбранной категории'}</p>
+                        <p>${activeProducts.length === 0 ? 'Нет активных товаров' : 'Нет товаров в выбранном разделе'}</p>
                         ${activeProducts.length === 0 ? 
                             '<p><a href="admin/admin-login.html" style="color: #d4af37;">Добавьте товары в админ-панели</a></p>' : 
                             ''
@@ -409,11 +415,41 @@ function initializeProducts() {
     function createProductCard(product) {
         const card = document.createElement('div');
         card.className = 'product-card';
-        card.dataset.category = product.category;
         card.dataset.section = product.section || 'all';
         
-        const badge = product.badge ? `<div class="product-badge">${product.badge}</div>` : '';
+        // Бейдж
+        let badgeClass = '';
+        if (product.badge) {
+            switch(product.badge.toLowerCase()) {
+                case 'хит продаж':
+                case 'хит':
+                    badgeClass = 'hit';
+                    break;
+                case 'новинка':
+                case 'new':
+                    badgeClass = 'new';
+                    break;
+                case 'акция':
+                case 'sale':
+                    badgeClass = 'sale';
+                    break;
+                case 'эксклюзив':
+                case 'exclusive':
+                    badgeClass = 'exclusive';
+                    break;
+                case 'премиум':
+                case 'premium':
+                    badgeClass = 'premium';
+                    break;
+                default:
+                    badgeClass = 'new';
+            }
+        }
         
+        const badge = product.badge ? 
+            `<div class="product-badge ${badgeClass}">${product.badge}</div>` : '';
+        
+        // Берем первое изображение из массива (если есть)
         let imageContent = '';
         if (product.images && product.images.length > 0) {
             imageContent = `<img src="${product.images[0]}" alt="${product.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
@@ -428,12 +464,9 @@ function initializeProducts() {
                     <i class="fas fa-couch"></i>
                 </div>
                 ${badge}
-                <a href="${productUrl}" class="product-link"></a>
             </div>
             <div class="product-info">
-                <h3 class="product-title">
-                    <a href="${productUrl}">${product.name}</a>
-                </h3>
+                <h3 class="product-title">${product.name}</h3>
                 <div class="product-description">
                     ${product.description || 'Качественный товар от MA Furniture'}
                 </div>
@@ -445,11 +478,9 @@ function initializeProducts() {
                         <i class="fas fa-shopping-cart"></i>
                         В корзину
                     </button>
-                    <a href="${productUrl}" class="btn btn-outline">
-                        <i class="fas fa-eye"></i>
-                    </a>
                 </div>
             </div>
+            <a href="${productUrl}" class="product-link-overlay"></a>
         `;
         
         return card;
@@ -499,13 +530,31 @@ function initializeProducts() {
     }
 
     function attachProductEventListeners() {
+        // Обработчик для кнопки "В корзину"
         document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
+                e.stopPropagation(); // Предотвращаем переход по ссылке
                 const productId = parseInt(e.target.closest('.add-to-cart-btn').dataset.productId);
                 const product = dataManager.getProductById(productId);
                 if (product && cartSystem) {
                     cartSystem.addToCart(product);
+                }
+            });
+        });
+        
+        // Обработчик для всей карточки (кроме кнопки корзины)
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                // Если клик был по кнопке корзины - не переходим на страницу товара
+                if (e.target.closest('.add-to-cart-btn')) {
+                    return;
+                }
+                
+                // Находим ссылку внутри карточки и переходим по ней
+                const link = card.querySelector('.product-link-overlay');
+                if (link) {
+                    window.location.href = link.href;
                 }
             });
         });
@@ -529,31 +578,93 @@ function initializeProducts() {
         });
     }
 
+    function loadSectionsFromAdmin() {
+        try {
+            const adminSections = JSON.parse(localStorage.getItem('adminSections')) || [];
+            const activeSections = adminSections.filter(section => section.active);
+            
+            return activeSections;
+        } catch (error) {
+            console.error('Error loading sections from admin:', error);
+            return [];
+        }
+    }
+
     function initializeFilters() {
-        const filterBtns = document.querySelectorAll('.filter-btn');
+        const catalogFilters = document.getElementById('catalogFilters');
+        const footerSections = document.getElementById('footerSections');
         
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const filter = btn.dataset.filter;
+        if (!catalogFilters || !footerSections) return;
+        
+        // Загружаем разделы из админки
+        const sections = loadSectionsFromAdmin();
+        
+        // Очищаем контейнеры
+        catalogFilters.innerHTML = '<button class="filter-btn active" data-filter="all">Все товары</button>';
+        footerSections.innerHTML = '';
+        
+        // Добавляем обработчик для фильтра "Все товары"
+        const allFilterBtn = catalogFilters.querySelector('[data-filter="all"]');
+        allFilterBtn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            allFilterBtn.classList.add('active');
+            
+            currentFilter = 'all';
+            currentPage = 1;
+            renderProducts();
+        });
+        
+        // Добавляем фильтры для активных разделов
+        sections.forEach(section => {
+            // Фильтры в каталоге
+            const filterBtn = document.createElement('button');
+            filterBtn.className = 'filter-btn';
+            filterBtn.dataset.filter = section.code;
+            filterBtn.textContent = section.name;
+            filterBtn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                filterBtn.classList.add('active');
                 
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                currentFilter = filter;
+                currentFilter = section.code;
                 currentPage = 1;
                 renderProducts();
             });
+            catalogFilters.appendChild(filterBtn);
+            
+            // Ссылки в футере
+            const footerLink = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = `shop.html?section=${section.code}`;
+            link.textContent = section.name;
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const filterBtn = document.querySelector(`[data-filter="${section.code}"]`);
+                if (filterBtn) {
+                    filterBtn.click();
+                    window.scrollTo({ top: document.getElementById('catalog').offsetTop - 100, behavior: 'smooth' });
+                }
+            });
+            footerLink.appendChild(link);
+            footerSections.appendChild(footerLink);
         });
     }
 
     function handleUrlFilters() {
         const urlParams = new URLSearchParams(window.location.search);
-        const category = urlParams.get('category');
+        const section = urlParams.get('section');
         
-        if (category) {
-            const filterBtn = document.querySelector(`[data-filter="${category}"]`);
+        if (section) {
+            const filterBtn = document.querySelector(`[data-filter="${section}"]`);
             if (filterBtn) {
                 filterBtn.click();
+            }
+        } else {
+            // Если параметра section нет, активируем фильтр "Все товары"
+            const allFilterBtn = document.querySelector('[data-filter="all"]');
+            if (allFilterBtn) {
+                allFilterBtn.classList.add('active');
+                currentFilter = 'all';
+                renderProducts();
             }
         }
     }

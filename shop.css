@@ -217,6 +217,29 @@ body {
     flex-wrap: wrap;
 }
 
+/* Обновленные стили для заголовка каталога */
+.section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--text-dark);
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
 /* Каталог и фильтры */
 .catalog {
     padding: 80px 0;
@@ -264,6 +287,8 @@ body {
     transition: var(--transition);
     display: flex;
     flex-direction: column;
+    cursor: pointer;
+    position: relative;
 }
 
 .product-card:hover {
@@ -336,6 +361,13 @@ body {
     gap: 0.5rem;
     align-items: center;
     margin-top: auto;
+    position: relative;
+    z-index: 2;
+}
+
+/* Убираем быстрый осмотр */
+.product-actions .btn-outline {
+    display: none;
 }
 
 .btn-wishlist {
@@ -351,6 +383,101 @@ body {
 .btn-wishlist:hover,
 .btn-wishlist.active {
     color: #e74c3c;
+}
+
+/* Обновленные стили для бейджей */
+.product-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 2;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    transition: var(--transition);
+}
+
+.product-badge.hit {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+.product-badge.new {
+    background: linear-gradient(135deg, #27ae60, #219a52);
+    color: white;
+    animation: badgePulse 3s ease-in-out infinite;
+}
+
+.product-badge.sale {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+}
+
+.product-badge.exclusive {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+}
+
+.product-badge.premium {
+    background: linear-gradient(135deg, #d4af37, #b8941f);
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.product-card:hover .product-badge {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Анимация для бейджей */
+@keyframes badgePulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Эффект свечения для премиум бейджей */
+.product-badge.premium::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: rotate(45deg);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
+}
+
+/* Ссылка на всю карточку */
+.product-link-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
 }
 
 /* Пагинация */
@@ -1477,4 +1604,11 @@ body {
 
 .cart-icon.animate {
     animation: addToCart 0.3s ease-in-out;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
 }

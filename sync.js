@@ -30,6 +30,11 @@ class DataSync {
                     images: product.images || [],
                     features: this.parseFeatures(product.features),
                     specifications: this.parseSpecifications(product.specifications),
+                    multipleColors: product.multipleColors || false,
+                    colorsCount: product.colorsCount || 1,
+                    isColorVariant: product.isColorVariant || false,
+                    originalProductId: product.originalProductId || null,
+                    colorIndex: product.colorIndex || null,
                     createdAt: product.createdAt || new Date().toISOString(),
                     updatedAt: product.updatedAt || new Date().toISOString()
                 }));

@@ -1,0 +1,9 @@
+meta:
+  environment: python
+  toolchain:
+    name: pip
+    version: latest
+build:
+  requirementsPath: requirements.txt
+run:
+  command: python app.py

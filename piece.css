@@ -2312,3 +2312,55 @@ h1, h2, h3, h4, h5, h6, p, span, a, li, button, input, textarea {
         max-width: none;
     }
 }
+
+.color-selector {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.color-selector h4 {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #333;
+}
+
+.color-options {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.color-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.color-option.active {
+    border-color: #d4af37;
+    background-color: #fef9e7;
+}
+
+.color-option:hover {
+    border-color: #b8941f;
+}
+
+.color-sample {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    margin-bottom: 0.25rem;
+    border: 1px solid #ddd;
+}
+
+.color-option span {
+    font-size: 0.8rem;
+    color: #666;
+}
