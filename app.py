@@ -1,61 +1,54 @@
 from flask import Flask, send_from_directory
 import os
+import logging
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
-# Конфигурация
-app.config['SECRET_KEY'] = 'ma-furniture-secret-key-2024'
-
-# Основные маршруты
 @app.route('/')
 def index():
-    return app.send_static_file('index.html')
+    logger.info("Serving index.html")
+    return send_from_directory('.', 'index.html')
 
 @app.route('/shop')
 def shop():
-    return app.send_static_file('shop.html')
+    logger.info("Serving shop.html")
+    return send_from_directory('.', 'shop.html')
 
 @app.route('/piece')
 def product():
-    return app.send_static_file('piece.html')
+    logger.info("Serving piece.html")
+    return send_from_directory('.', 'piece.html')
 
 @app.route('/admin')
 def admin():
-    return app.send_static_file('admin.html')
+    logger.info("Serving admin.html")
+    return send_from_directory('.', 'admin.html')
 
 @app.route('/admin-login')
 def admin_login():
-    return app.send_static_file('admin-login.html')
+    logger.info("Serving admin-login.html")
+    return send_from_directory('.', 'admin-login.html')
 
-# Статические файлы - обслуживаем все файлы
-@app.route('/<path:filename>')
-def serve_static(filename):
+# Обслуживаем все статические файлы
+@app.route('/<path:path>')
+def serve_static(path):
+    logger.info(f"Serving static file: {path}")
     try:
-        return app.send_static_file(filename)
-    except:
+        return send_from_directory('.', path)
+    except Exception as e:
+        logger.error(f"Error serving {path}: {e}")
         return "File not found", 404
 
-# API маршруты (заглушки)
-@app.route('/api/products')
-def api_products():
-    return {"success": True, "products": []}
-
-@app.route('/api/orders', methods=['POST'])
-def api_orders():
-    return {"success": True, "message": "Order received"}
-
-@app.route('/api/auth', methods=['POST'])
-def api_auth():
-    return {"success": True, "authenticated": True}
-
-# Обработка ошибок
-@app.errorhandler(404)
-def not_found(error):
-    return app.send_static_file('index.html')
+# Health check для Amvera
+@app.route('/health')
+def health():
+    return {"status": "healthy", "message": "MA Furniture is running"}
 
 if __name__ == '__main__':
-    # Amvera сам управляет портом через переменную окружения PORT
     port = int(os.environ.get('PORT', 5000))
-    
-    # Важно: 0.0.0.0 для работы в контейнере
+    logger.info(f"Starting MA Furniture app on port {port}")
     app.run(host='0.0.0.0', port=port, debug=False)
