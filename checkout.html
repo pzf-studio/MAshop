@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформление заказа - MA Furniture</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/checkout.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="/index.html">
+                        <div class="logo-container">
+                            <img src="./images/logo2.png" alt="MA Furniture" class="logo-image">
+                            <div class="logo-text-container">
+                                <span class="logo-text">MA FURNITURE</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="/index.html">Главная</a></li>
+                        <li><a href="/shop.html">Каталог</a></li>
+                        <li><a href="/index.html#about">О компании</a></li>
+                        <li><a href="/index.html#faq">FAQ</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="header-actions">
+                    <button class="cart-btn" id="cartBtn">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="container">
+            <!-- Breadcrumbs -->
+            <nav class="breadcrumbs">
+                <a href="/index.html">Главная</a>
+                <span class="separator">/</span>
+                <a href="/shop.html">Каталог</a>
+                <span class="separator">/</span>
+                <a href="/cart.html">Корзина</a>
+                <span class="separator">/</span>
+                <span class="current">Оформление заказа</span>
+            </nav>
+
+            <div class="checkout-layout">
+                <!-- Order Summary -->
+                <div class="order-summary">
+                    <h2>Ваш заказ</h2>
+                    <div class="order-items" id="orderItems">
+                        <!-- Cart items will be loaded here -->
+                    </div>
+                    <div class="order-totals">
+                        <div class="total-row">
+                            <span>Промежуточный итог:</span>
+                            <span id="subtotal">0 ₽</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Доставка:</span>
+                            <span>Рассчитывается индивидуально</span>
+                        </div>
+                        <div class="total-row final">
+                            <span>Общая сумма:</span>
+                            <span id="totalAmount">0 ₽</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Checkout Form -->
+                <div class="checkout-form-container">
+                    <h2>Данные для заказа</h2>
+                    <form class="checkout-form" id="checkoutForm">
+                        <!-- Personal Information -->
+                        <div class="form-section">
+                            <h3>Контактная информация</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="customerName">Имя *</label>
+                                    <input type="text" id="customerName" name="customerName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="customerPhone">Телефон *</label>
+                                    <input type="tel" id="customerPhone" name="customerPhone" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerEmail">Email *</label>
+                                <input type="email" id="customerEmail" name="customerEmail" required>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Information -->
+                        <div class="form-section">
+                            <h3>Доставка</h3>
+                            <div class="form-group">
+                                <label for="deliveryMethod">Способ доставки *</label>
+                                <select id="deliveryMethod" name="deliveryMethod" required>
+                                    <option value="">Выберите способ доставки</option>
+                                    <option value="courier">Курьерская доставка</option>
+                                    <option value="pickup">Самовывоз</option>
+                                    <option value="transport-company">Транспортная компания</option>
+                                </select>
+                            </div>
+                            
+                            <div class="delivery-address" id="deliveryAddress">
+                                <div class="form-group">
+                                    <label for="deliveryCity">Город *</label>
+                                    <input type="text" id="deliveryCity" name="deliveryCity">
+                                </div>
+                                <div class="form-group">
+                                    <label for="deliveryAddress">Адрес доставки *</label>
+                                    <textarea id="deliveryAddress" name="deliveryAddress" rows="3" placeholder="Улица, дом, квартира"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="deliveryComment">Комментарий к доставке</label>
+                                    <textarea id="deliveryComment" name="deliveryComment" rows="2" placeholder="Дополнительная информация для курьера"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="form-section">
+                            <h3>Способ оплаты</h3>
+                            <div class="payment-methods">
+                                <label class="payment-method">
+                                    <input type="radio" name="paymentMethod" value="cash" required>
+                                    <div class="payment-content">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                        <span>Наличными при получении</span>
+                                    </div>
+                                </label>
+                                <label class="payment-method">
+                                    <input type="radio" name="paymentMethod" value="card" required>
+                                    <div class="payment-content">
+                                        <i class="fas fa-credit-card"></i>
+                                        <span>Банковской картой онлайн</span>
+                                    </div>
+                                </label>
+                                <label class="payment-method">
+                                    <input type="radio" name="paymentMethod" value="installment" required>
+                                    <div class="payment-content">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span>Рассрочка</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="form-section">
+                            <h3>Дополнительная информация</h3>
+                            <div class="form-group">
+                                <label for="orderComment">Комментарий к заказу</label>
+                                <textarea id="orderComment" name="orderComment" rows="3" placeholder="Ваши пожелания или особые указания"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Agreement -->
+                        <div class="form-section">
+                            <div class="form-group checkbox-group">
+                                <input type="checkbox" id="privacyPolicy" name="privacyPolicy" required>
+                                <label for="privacyPolicy">
+                                    Я согласен с <a href="/privacy-policy.html" target="_blank">политикой конфиденциальности</a> и 
+                                    <a href="/terms.html" target="_blank">правилами обработки персональных данных</a> *
+                                </label>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <input type="checkbox" id="newsletter" name="newsletter">
+                                <label for="newsletter">
+                                    Хочу получать информацию о новых коллекциях и специальных предложениях
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="form-actions">
+                            <a href="/cart.html" class="btn btn-outline">
+                                <i class="fas fa-arrow-left"></i>
+                                Вернуться в корзину
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="submitOrder">
+                                <i class="fas fa-paper-plane"></i>
+                                Отправить заказ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>MA Furniture</h3>
+                    <p>Эксклюзивные гардеробные системы премиум-класса с итальянским дизайном и немецкой точностью.</p>
+                    <div class="social-links">
+                        <a href="https://t.me/Ma_Furniture_ru" aria-label="Telegram">
+                            <i class="fab fa-telegram-plane"></i>
+                        </a>
+                        <a href="#" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" aria-label="WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Навигация</h4>
+                    <ul>
+                        <li><a href="/index.html">Главная</a></li>
+                        <li><a href="/index.html#about">О компании</a></li>
+                        <li><a href="/shop.html">Магазин</a></li>
+                        <li><a href="/index.html#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Категории</h4>
+                    <ul>
+                        <li><a href="/shop.html?category=pantograph">Пантографы</a></li>
+                        <li><a href="/shop.html?category=wardrobe">Гардеробные системы</a></li>
+                        <li><a href="/shop.html?category=premium">Премиум коллекция</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> +7 (910) 005-34-24</li>
+                        <li><i class="fas fa-envelope"></i> ma.furniture@mail.ru</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Москва, Россия</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 MA Furniture. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Заказ успешно оформлен!</h3>
+                <p>Ваш заказ принят в обработку. Наш менеджер свяжется с вами в ближайшее время для подтверждения заказа.</p>
+                <div class="order-info" id="orderInfo">
+                    <!-- Order details will be shown here -->
+                </div>
+                <div class="modal-actions">
+                    <a href="/shop.html" class="btn btn-outline">Продолжить покупки</a>
+                    <a href="/index.html" class="btn btn-primary">На главную</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/data-manager.js"></script>
+    <script src="/cart.js"></script>
+    <script src="/checkout.js"></script>
+</body>
+</html>
