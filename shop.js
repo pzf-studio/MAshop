@@ -23,6 +23,8 @@ function initializeApp() {
 class CartSystem {
     constructor() {
         this.cart = JSON.parse(localStorage.getItem('ma_furniture_cart')) || [];
+        this.checkoutModal = null;
+        this.isCheckoutModalOpen = false;
         this.init();
     }
     
@@ -159,7 +161,25 @@ class CartSystem {
     }
     
     saveCart() {
-        localStorage.setItem('ma_furniture_cart', JSON.stringify(this.cart));
+        try {
+            // Очищаем лишние данные перед сохранением
+            const cartToSave = this.cart.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                image: item.image,
+                quantity: item.quantity
+            }));
+            
+            localStorage.setItem('ma_furniture_cart', JSON.stringify(cartToSave));
+        } catch (error) {
+            console.error('Ошибка сохранения корзины:', error);
+            // Если localStorage переполнен, очищаем его и пробуем снова
+            if (error.name === 'QuotaExceededError') {
+                localStorage.clear();
+                localStorage.setItem('ma_furniture_cart', JSON.stringify(this.cart));
+            }
+        }
     }
     
     updateCartUI() {
@@ -261,6 +281,243 @@ class CartSystem {
             checkoutBtn.disabled = this.cart.length === 0;
         }
     }
+
+    // Новые методы для модального окна оформления заказа
+    createCheckoutModal() {
+        if (this.checkoutModal) return;
+        
+        const modal = document.createElement('div');
+        modal.className = 'checkout-modal';
+        modal.id = 'checkoutModal';
+        modal.innerHTML = `
+            <div class="checkout-modal-content">
+                <div class="checkout-modal-header">
+                    <h3>Оформление заказа</h3>
+                    <button class="checkout-modal-close" id="checkoutModalClose">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="checkout-modal-body">
+                    <form id="checkoutForm">
+                        <div class="form-group">
+                            <label for="customerName">ФИО *</label>
+                            <input type="text" id="customerName" name="customerName" required 
+                                   placeholder="Иванов Иван Иванович">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerPhone">Телефон *</label>
+                            <input type="tel" id="customerPhone" name="customerPhone" required 
+                                   placeholder="+7 (900) 123-45-67">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerEmail">Email</label>
+                            <input type="email" id="customerEmail" name="customerEmail" 
+                                   placeholder="ivanov@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerAddress">Адрес доставки</label>
+                            <textarea id="customerAddress" name="customerAddress" 
+                                      placeholder="Город, улица, дом, квартира" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerComment">Комментарий к заказу</label>
+                            <textarea id="customerComment" name="customerComment" 
+                                      placeholder="Дополнительные пожелания" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="order-summary">
+                            <h4>Состав заказа:</h4>
+                            <div id="checkoutOrderItems"></div>
+                            <div class="order-total">
+                                <strong>Итого: <span id="checkoutTotalAmount">0 ₽</span></strong>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="checkout-modal-footer">
+                    <button type="button" class="btn btn-outline" id="checkoutModalCancel">
+                        Отмена
+                    </button>
+                    <button type="submit" form="checkoutForm" class="btn btn-primary" id="checkoutSubmitBtn">
+                        <i class="fas fa-paper-plane"></i>
+                        Отправить заказ
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        this.checkoutModal = modal;
+        this.bindCheckoutModalEvents();
+    }
+
+    bindCheckoutModalEvents() {
+        const closeBtn = document.getElementById('checkoutModalClose');
+        const cancelBtn = document.getElementById('checkoutModalCancel');
+        const form = document.getElementById('checkoutForm');
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.closeCheckoutModal());
+        }
+        
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => this.closeCheckoutModal());
+        }
+        
+        if (form) {
+            form.addEventListener('submit', (e) => this.handleCheckoutSubmit(e));
+        }
+        
+        // Закрытие по клику вне модального окна
+        this.checkoutModal.addEventListener('click', (e) => {
+            if (e.target === this.checkoutModal) {
+                this.closeCheckoutModal();
+            }
+        });
+        
+        // Закрытие по ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isCheckoutModalOpen) {
+                this.closeCheckoutModal();
+            }
+        });
+    }
+
+    openCheckoutModal() {
+        if (!this.checkoutModal) {
+            this.createCheckoutModal();
+        }
+        
+        this.renderCheckoutOrderSummary();
+        this.checkoutModal.classList.add('active');
+        this.isCheckoutModalOpen = true;
+        document.body.style.overflow = 'hidden';
+        
+        // Автофокус на первом поле
+        const nameInput = document.getElementById('customerName');
+        if (nameInput) {
+            setTimeout(() => nameInput.focus(), 300);
+        }
+    }
+
+    closeCheckoutModal() {
+        if (this.checkoutModal) {
+            this.checkoutModal.classList.remove('active');
+            this.isCheckoutModalOpen = false;
+            document.body.style.overflow = '';
+        }
+    }
+
+    renderCheckoutOrderSummary() {
+        const itemsContainer = document.getElementById('checkoutOrderItems');
+        const totalAmount = document.getElementById('checkoutTotalAmount');
+        
+        if (!itemsContainer || !totalAmount) return;
+        
+        let itemsHTML = '';
+        let total = 0;
+        
+        this.cart.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            total += itemTotal;
+            
+            itemsHTML += `
+                <div class="checkout-order-item">
+                    <span class="item-name">${item.name}</span>
+                    <span class="item-quantity">${item.quantity} шт.</span>
+                    <span class="item-price">${this.formatPrice(itemTotal)}</span>
+                </div>
+            `;
+        });
+        
+        itemsContainer.innerHTML = itemsHTML;
+        totalAmount.textContent = this.formatPrice(total);
+    }
+
+    async handleCheckoutSubmit(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        const orderData = {
+            customer_name: formData.get('customerName'),
+            customer_phone: formData.get('customerPhone'),
+            customer_email: formData.get('customerEmail') || '',
+            customer_address: formData.get('customerAddress') || '',
+            customer_comment: formData.get('customerComment') || '',
+            items: this.cart,
+            total: this.getCartTotal(),
+            order_date: new Date().toISOString()
+        };
+        
+        // Валидация
+        if (!orderData.customer_name || !orderData.customer_phone) {
+            this.showNotification('Пожалуйста, заполните обязательные поля (ФИО и телефон)', 'error');
+            return;
+        }
+        
+        // Блокируем кнопку отправки
+        const submitBtn = document.getElementById('checkoutSubmitBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+        submitBtn.disabled = true;
+        
+        try {
+            // Используем DataManager для отправки заказа
+            const result = await dataManager.submitOrder(orderData);
+            
+            if (result.success) {
+                if (result.telegram_sent) {
+                    this.showNotification('Заказ успешно отправлен! Мы свяжемся с вами в ближайшее время.', 'success');
+                } else if (result.fallback_used) {
+                    this.showNotificationWithAction(
+                        result.message,
+                        'info',
+                        'Отправить через Telegram',
+                        () => {
+                            const telegramResult = dataManager.openTelegramFallback(orderData);
+                            if (telegramResult.success) {
+                                this.showNotification('Заказ открыт в Telegram для отправки', 'success');
+                                this.closeCheckoutModal();
+                                this.clearCart();
+                            }
+                        }
+                    );
+                    return; // Не закрываем модалку сразу, ждем действия пользователя
+                }
+                
+                this.closeCheckoutModal();
+                this.clearCart();
+            } else {
+                // Если есть fallback вариант, предлагаем его пользователю
+                if (result.fallback_available) {
+                    this.showNotificationWithAction(
+                        result.error,
+                        'error',
+                        'Отправить через Telegram',
+                        () => {
+                            const telegramResult = dataManager.openTelegramFallback(orderData);
+                            if (telegramResult.success) {
+                                this.showNotification('Заказ открыт в Telegram для отправки', 'success');
+                                this.closeCheckoutModal();
+                                this.clearCart();
+                            }
+                        }
+                    );
+                } else {
+                    throw new Error(result.error || 'Ошибка отправки заказа');
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка оформления заказа:', error);
+            this.showNotification('Произошла ошибка при отправке заказа. Попробуйте еще раз.', 'error');
+        } finally {
+            // Восстанавливаем кнопку
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
     
     checkout() {
         if (this.cart.length === 0) {
@@ -268,33 +525,7 @@ class CartSystem {
             return;
         }
         
-        let message = '🛒 НОВЫЙ ЗАКАЗ MA FURNITURE\n\n';
-        let total = 0;
-        
-        this.cart.forEach((item, index) => {
-            const itemTotal = item.price * item.quantity;
-            total += itemTotal;
-            message += `${index + 1}. ${item.name}\n`;
-            message += `   Количество: ${item.quantity} шт.\n`;
-            message += `   Цена за шт: ${this.formatPrice(item.price)}\n`;
-            message += `   Сумма: ${this.formatPrice(itemTotal)}\n\n`;
-        });
-        
-        message += `💰 ОБЩАЯ СУММА: ${this.formatPrice(total)}\n\n`;
-        message += `📅 ${new Date().toLocaleString('ru-RU')}`;
-        
-        const encodedMessage = encodeURIComponent(message);
-        const telegramUrl = `https://t.me/Ma_Furniture_ru?text=${encodedMessage}`;
-        
-        window.open(telegramUrl, '_blank');
-        
-        this.cart = [];
-        this.saveCart();
-        this.updateCartUI();
-        this.renderCart();
-        this.closeCart();
-        
-        this.showNotification('Заказ оформлен! Свяжитесь с нами в Telegram для подтверждения.', 'success');
+        this.openCheckoutModal();
     }
     
     clearCart() {
@@ -302,7 +533,6 @@ class CartSystem {
         this.saveCart();
         this.updateCartUI();
         this.renderCart();
-        this.showNotification('Корзина очищена', 'success');
     }
     
     getCartTotal() {
@@ -342,6 +572,42 @@ class CartSystem {
             notification.classList.remove('show');
             setTimeout(() => notification.remove(), 300);
         }, 3000);
+    }
+
+    // Новый метод для показа уведомления с действием
+    showNotificationWithAction(message, type, actionText, actionCallback) {
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(notification => notification.remove());
+        
+        const notification = document.createElement('div');
+        notification.className = `notification ${type} with-action`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
+                ${message}
+                <button class="notification-action-btn">${actionText}</button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.classList.add('show'), 100);
+        
+        // Обработчик кнопки действия
+        const actionBtn = notification.querySelector('.notification-action-btn');
+        actionBtn.addEventListener('click', () => {
+            actionCallback();
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        });
+        
+        // Автоматическое скрытие через 10 секунд
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 10000);
     }
     
     formatPrice(price) {

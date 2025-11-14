@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в админ-панель - MA Furniture</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Playfair Display', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 440px;
+            position: relative;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+        }
+
+        .login-header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .login-body {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2d3748;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #d4af37;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .password-input {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #718096;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-password:hover {
+            color: #d4af37;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .back-link {
+            color: #718096;
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #d4af37;
+        }
+
+        .security-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #856404;
+        }
+
+        .security-info h4 {
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .security-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .security-info li {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .security-info li i {
+            font-size: 0.8rem;
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            max-width: 400px;
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border-left: 4px solid #d4af37;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification.success {
+            border-left-color: #10b981;
+        }
+
+        .notification.error {
+            border-left-color: #ef4444;
+        }
+
+        .notification.info {
+            border-left-color: #3b82f6;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notification-content i {
+            font-size: 1.4rem;
+        }
+
+        .notification.success .notification-content i {
+            color: #10b981;
+        }
+
+        .notification.error .notification-content i {
+            color: #ef4444;
+        }
+
+        .notification.info .notification-content i {
+            color: #3b82f6;
+        }
+
+        /* Attempts Display */
+        #attemptsDisplay {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            background: #f8f9fa;
+        }
+
+        /* Loading Animation */
+        .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .login-header {
+                padding: 30px 20px;
+            }
+
+            .login-body {
+                padding: 30px 20px;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .notification {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+
+        /* Password Strength Indicator */
+        .password-strength {
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+
+        .strength-bar {
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+        }
+
+        .strength-weak { background: #ef4444; width: 33%; }
+        .strength-medium { background: #f59e0b; width: 66%; }
+        .strength-strong { background: #10b981; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="logo">
+                <i class="fas fa-couch"></i>
+                MA FURNITURE
+            </div>
+            <h1>Административная панель</h1>
+        </div>
+
+        <div class="login-body">
+            <div class="security-info">
+                <h4><i class="fas fa-shield-alt"></i> Информация для входа</h4>
+                <ul>
+                    <li><i class="fas fa-user"></i> Логин: admin</li>
+                    <li><i class="fas fa-key"></i> Пароль: admin123</li>
+                    <li><i class="fas fa-exclamation-triangle"></i> После 5 неудачных попыток - блокировка на 15 минут</li>
+                </ul>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user"></i> Имя пользователя</label>
+                    <input type="text" id="username" class="form-control" placeholder="Введите имя пользователя" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Пароль</label>
+                    <div class="password-input">
+                        <input type="password" id="password" class="form-control" placeholder="Введите пароль" required>
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <small id="attemptsDisplay" style="display: none; text-align: center; margin-top: 10px;"></small>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Войти в панель управления
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <a href="../index.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Вернуться на сайт
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin-auth.js"></script>
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+
+        // Auto-focus on username field
+        document.getElementById('username').focus();
+
+        // Function to show notifications
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation' : 'info'}-circle"></i>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+
+        // Function to update attempts display
+        function updateAttemptsDisplay(attempts, maxAttempts) {
+            const attemptsDisplay = document.getElementById('attemptsDisplay');
+            if (attemptsDisplay) {
+                attemptsDisplay.textContent = `Неудачных попыток: ${attempts}/${maxAttempts}`;
+                attemptsDisplay.style.display = 'block';
+                
+                // Change color based on attempts
+                if (attempts >= maxAttempts - 1) {
+                    attemptsDisplay.style.color = '#e74c3c';
+                    attemptsDisplay.style.background = '#fee2e2';
+                    attemptsDisplay.style.border = '1px solid #fecaca';
+                } else if (attempts >= maxAttempts - 2) {
+                    attemptsDisplay.style.color = '#f39c12';
+                    attemptsDisplay.style.background = '#fef3c7';
+                    attemptsDisplay.style.border = '1px solid #fde68a';
+                } else {
+                    attemptsDisplay.style.color = '#95a5a6';
+                    attemptsDisplay.style.background = '#f8f9fa';
+                    attemptsDisplay.style.border = '1px solid #e9ecef';
+                }
+            }
+        }
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('loginBtn');
+            const originalText = submitBtn.innerHTML;
+
+            // Show loading indicator
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
+            submitBtn.disabled = true;
+
+            try {
+                // Check login security
+                const securityCheck = adminAuth.checkLoginSecurity(username);
+                if (!securityCheck.allowed) {
+                    showNotification(securityCheck.reason, 'error');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                // Perform login
+                const result = adminAuth.login(username, password);
+                
+                if (result.success) {
+                    showNotification(result.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 1000);
+                } else {
+                    showNotification(result.message, 'error');
+                    
+                    // Show attempts information if available
+                    if (result.attempts !== undefined) {
+                        updateAttemptsDisplay(result.attempts, result.maxAttempts);
+                    }
+                    
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showNotification('Произошла ошибка при входе', 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Clear attempts display when username changes
+        document.getElementById('username').addEventListener('input', function() {
+            const attemptsDisplay = document.getElementById('attemptsDisplay');
+            if (attemptsDisplay) {
+                attemptsDisplay.style.display = 'none';
+            }
+        });
+
+        // Enter key support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const loginForm = document.getElementById('loginForm');
+                if (loginForm) {
+                    loginForm.dispatchEvent(new Event('submit'));
+                }
+            }
+        });
+
+        // Check if user is already logged in
+        if (adminAuth.validateSession()) {
+            showNotification('Вы уже авторизованы. Перенаправление...', 'info');
+            setTimeout(() => {
+                window.location.href = 'admin.html';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

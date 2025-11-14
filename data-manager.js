@@ -1,53 +1,141 @@
+// Встроенный TelegramService - ОСТАВЛЯЕМ ТОЛЬКО ЭТОТ
+class TelegramService {
+    constructor() {
+        this.botToken = '8595614348:AAFSrVFLjI7o_FS-36DTDDLgGlGgSD03jLY';
+        this.chatId = '743619189';
+        this.apiUrl = `https://api.telegram.org/bot${this.botToken}/sendMessage`;
+    }
+
+    async sendOrder(orderData) {
+        try {
+            const message = this.formatOrderMessage(orderData);
+            
+            console.log('Отправка запроса к Telegram API...');
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: this.chatId,
+                    text: message,
+                    parse_mode: 'HTML'
+                })
+            });
+
+            const result = await response.json();
+            
+            if (result.ok) {
+                console.log('Заказ успешно отправлен в Telegram');
+                return {
+                    success: true,
+                    message_id: result.result.message_id,
+                    telegram_sent: true
+                };
+            } else {
+                console.error('Telegram API ошибка:', result);
+                throw new Error(result.description || `Ошибка Telegram API: ${result.error_code}`);
+            }
+        } catch (error) {
+            console.error('Ошибка отправки в Telegram:', error);
+            throw error;
+        }
+    }
+
+    formatOrderMessage(orderData) {
+        const formatPrice = (price) => {
+            return new Intl.NumberFormat('ru-RU', {
+                style: 'currency',
+                currency: 'RUB',
+                minimumFractionDigits: 0
+            }).format(price);
+        };
+
+        let message = `<b>🛒 НОВЫЙ ЗАКАЗ MA FURNITURE</b>\n\n`;
+        
+        // Информация о товарах
+        message += `<b>📦 Состав заказа:</b>\n`;
+        orderData.items.forEach((item, index) => {
+            message += `${index + 1}. <b>${this.escapeHtml(item.name)}</b>\n`;
+            message += `   Количество: ${item.quantity} шт.\n`;
+            message += `   Цена за шт: ${formatPrice(item.price)}\n`;
+            message += `   Сумма: ${formatPrice(item.price * item.quantity)}\n\n`;
+        });
+        
+        message += `<b>💰 ОБЩАЯ СУММА: ${formatPrice(orderData.total)}</b>\n\n`;
+        
+        // Информация о клиенте
+        message += `<b>👤 Данные клиента:</b>\n`;
+        message += `ФИО: ${this.escapeHtml(orderData.customer_name)}\n`;
+        message += `Телефон: ${this.escapeHtml(orderData.customer_phone)}\n`;
+        
+        if (orderData.customer_email) {
+            message += `Email: ${this.escapeHtml(orderData.customer_email)}\n`;
+        }
+        
+        if (orderData.customer_address) {
+            message += `Адрес: ${this.escapeHtml(orderData.customer_address)}\n`;
+        }
+        
+        if (orderData.customer_comment) {
+            message += `Комментарий: ${this.escapeHtml(orderData.customer_comment)}\n`;
+        }
+        
+        message += `\n📅 ${new Date().toLocaleString('ru-RU')}`;
+        message += `\n\n🌐 <i>Заказ с сайта: MA Furniture</i>`;
+        
+        return message;
+    }
+
+    escapeHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+}
+
+// Создаем глобальный экземпляр
+const telegramService = new TelegramService();
+
 class DataManager {
     constructor() {
         this.products = [];
         this.sections = [];
         this.apiBaseUrl = '/api';
-        this.useAPI = false; // Временно отключаем API до развертывания бэкенда
+        this.useAPI = false;
+        this.telegramService = telegramService;
         this.init();
     }
 
     async init() {
-        if (this.useAPI) {
-            await this.loadFromAPI();
-        } else {
-            this.loadFromLocalStorage();
-        }
+        await this.loadFromLocalStorage();
         this.setupSync();
+        
+        const health = await this.checkAPIHealth();
+        console.log('DataManager: Статус API для заказов:', health);
     }
 
-    async loadFromAPI() {
+    async loadFromLocalStorage() {
         try {
-            const response = await fetch(`${this.apiBaseUrl}/products?active_only=true`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
+            console.log('DataManager: Загрузка данных из localStorage...');
             
-            if (data.success) {
-                this.products = data.products;
-                this.saveToLocalStorage();
-                console.log(`DataManager: Загружено ${this.products.length} товаров из API`);
-            } else {
-                throw new Error(data.error || 'Ошибка загрузки данных');
-            }
-        } catch (error) {
-            console.error('DataManager: Ошибка загрузки из API:', error);
-            console.log('DataManager: Переключаемся на localStorage...');
-            this.loadFromLocalStorage();
-        }
-    }
-
-    loadFromLocalStorage() {
-        try {
-            // Пробуем загрузить из adminProducts (админ-панель)
+            // Сначала пробуем загрузить из adminProducts (админ-панель) - ПРИОРИТЕТ
             const adminProducts = JSON.parse(localStorage.getItem('adminProducts')) || [];
             const localProducts = JSON.parse(localStorage.getItem('products')) || [];
+            
+            console.log('DataManager: adminProducts найдено:', adminProducts.length);
+            console.log('DataManager: localProducts найдено:', localProducts.length);
             
             // Приоритет у adminProducts, если они есть
             if (adminProducts.length > 0) {
                 this.products = this.transformAdminProducts(adminProducts);
                 console.log(`DataManager: Загружено ${this.products.length} товаров из adminProducts`);
+                // Сохраняем преобразованные товары в products для совместимости
+                this.saveToLocalStorage();
             } else if (localProducts.length > 0) {
                 this.products = localProducts;
                 console.log(`DataManager: Загружено ${this.products.length} товаров из localStorage`);
@@ -57,18 +145,23 @@ class DataManager {
             }
             
             // Загружаем разделы из админки
-            this.loadSections();
+            await this.loadSections();
+            
+            // Уведомляем о загрузке данных
+            this.notifyUpdate();
+            
         } catch (error) {
             console.error('DataManager: Ошибка загрузки из localStorage:', error);
             this.initializeDemoData();
         }
     }
     
-    loadSections() {
+    async loadSections() {
         try {
             this.sections = JSON.parse(localStorage.getItem('adminSections')) || [];
+            console.log('DataManager: Загружено разделов:', this.sections.length);
+            
             if (this.sections.length === 0) {
-                // Создаем базовые разделы, если их нет
                 this.sections = [
                     { id: 1, name: 'Пантографы', code: 'pantograph', product_count: 0, active: true },
                     { id: 2, name: 'Nuomi Hera', code: 'nuomi-hera', product_count: 0, active: true },
@@ -85,7 +178,9 @@ class DataManager {
     }
 
     transformAdminProducts(adminProducts) {
-        return adminProducts.map(product => ({
+        console.log('DataManager: Преобразование adminProducts:', adminProducts.length);
+        
+        const transformedProducts = adminProducts.map(product => ({
             id: product.id,
             name: product.name,
             price: product.price,
@@ -96,7 +191,7 @@ class DataManager {
             featured: product.featured || false,
             stock: product.stock || 0,
             sku: product.sku || `MF-${product.id}`,
-            images: product.images || [], // Теперь может содержать до 5 изображений
+            images: product.images || [],
             features: Array.isArray(product.features) ? product.features : [],
             specifications: typeof product.specifications === 'object' ? product.specifications : {},
             multipleColors: product.multipleColors || false,
@@ -104,16 +199,19 @@ class DataManager {
             isColorVariant: product.isColorVariant || false,
             originalProductId: product.originalProductId || null,
             colorIndex: product.colorIndex || null,
-            // НОВЫЕ ПОЛЯ ДЛЯ СИСТЕМЫ ЦВЕТОВ
             colorVariants: product.colorVariants || [],
             colorName: product.colorName || null,
             colorHex: product.colorHex || null,
             createdAt: product.createdAt || new Date().toISOString(),
             updatedAt: product.updatedAt || new Date().toISOString()
         }));
+
+        console.log('DataManager: Преобразовано товаров:', transformedProducts.length);
+        return transformedProducts;
     }
 
     initializeDemoData() {
+        console.log('DataManager: Инициализация демо-данных');
         this.products = [
             {
                 id: 1,
@@ -182,15 +280,13 @@ class DataManager {
             }
         ];
         
-        // Добавляем варианты цветов для демо-товара
         this.createDemoColorVariants();
-        
         this.saveToLocalStorage();
         console.log('DataManager: Инициализированы демо-данные');
     }
 
     createDemoColorVariants() {
-        const mainProduct = this.products[0]; // Первый товар с multipleColors: true
+        const mainProduct = this.products[0];
         
         if (mainProduct.colorVariants && mainProduct.colorVariants.length > 0) {
             mainProduct.colorVariants.forEach((colorVariant, index) => {
@@ -224,6 +320,7 @@ class DataManager {
     saveToLocalStorage() {
         try {
             localStorage.setItem('products', JSON.stringify(this.products));
+            console.log('DataManager: Товары сохранены в localStorage');
         } catch (error) {
             console.error('DataManager: Ошибка сохранения в localStorage:', error);
         }
@@ -232,6 +329,7 @@ class DataManager {
     saveSections() {
         try {
             localStorage.setItem('adminSections', JSON.stringify(this.sections));
+            console.log('DataManager: Разделы сохранены в localStorage');
         } catch (error) {
             console.error('DataManager: Ошибка сохранения разделов:', error);
         }
@@ -252,7 +350,13 @@ class DataManager {
             this.notifyUpdate();
         });
 
-        // Периодическая синхронизация (только если используем API)
+        // Слушаем события синхронизации из sync.js
+        window.addEventListener('productsUpdated', () => {
+            console.log('DataManager: Обнаружена синхронизация товаров');
+            this.loadFromLocalStorage();
+            this.notifyUpdate();
+        });
+
         if (this.useAPI) {
             setInterval(() => {
                 this.loadFromAPI();
@@ -261,6 +365,7 @@ class DataManager {
     }
 
     notifyUpdate() {
+        console.log('DataManager: Уведомление об обновлении данных');
         const event = new CustomEvent('productsDataUpdated', {
             detail: { products: this.products, sections: this.sections }
         });
@@ -297,7 +402,6 @@ class DataManager {
         return shuffled.slice(0, limit);
     }
 
-    // Новый метод: получение вариантов цветов для товара
     getColorVariants(productId) {
         return this.products.filter(product => 
             product.isColorVariant && 
@@ -306,7 +410,6 @@ class DataManager {
         );
     }
 
-    // Новый метод: получение основного товара для варианта
     getMainProduct(variantId) {
         const variant = this.getProductById(variantId);
         if (variant && variant.isColorVariant) {
@@ -315,70 +418,95 @@ class DataManager {
         return null;
     }
     
-    // Новый метод: получение активных разделов
     getActiveSections() {
         return this.sections.filter(section => section.active);
     }
 
+    // ОСНОВНОЙ МЕТОД ДЛЯ ОТПРАВКИ ЗАКАЗОВ
     async submitOrder(orderData) {
-        if (this.useAPI) {
-            try {
-                const response = await fetch(`${this.apiBaseUrl}/orders`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(orderData)
-                });
-
-                const result = await response.json();
-                return result;
-            } catch (error) {
-                console.error('Ошибка оформления заказа через API:', error);
-                return this.fallbackOrderSubmit(orderData);
-            }
-        } else {
-            return this.fallbackOrderSubmit(orderData);
+        console.log('DataManager: Начинаем отправку заказа', orderData);
+        
+        try {
+            // Сначала пробуем отправить через Telegram API
+            console.log('Попытка отправки через Telegram API...');
+            const result = await this.telegramService.sendOrder(orderData);
+            
+            console.log('DataManager: Заказ успешно отправлен через Telegram:', result);
+            return {
+                success: true,
+                telegram_sent: true,
+                message: 'Заказ успешно отправлен! Мы свяжемся с вами в ближайшее время.'
+            };
+            
+        } catch (error) {
+            console.error('DataManager: Ошибка при отправке заказа в Telegram:', error);
+            
+            // Если Telegram API не работает, используем fallback - открываем Telegram с сообщением
+            console.log('Используем fallback метод...');
+            return { 
+                success: true, // Все равно считаем успешным, т.к. есть fallback
+                telegram_sent: false,
+                fallback_used: true,
+                message: 'Заказ подготовлен для отправки в Telegram',
+                fallback_available: true,
+                fallback_message: 'Нажмите кнопку ниже чтобы отправить заказ в Telegram',
+                fallback_action: () => this.openTelegramFallback(orderData)
+            };
         }
     }
 
-    fallbackOrderSubmit(orderData) {
-        // Fallback: отправка через Telegram
+    openTelegramFallback(orderData) {
         try {
             const message = this.formatOrderMessage(orderData);
-            const telegramUrl = `https://t.me/Ma_Furniture_ru?text=${encodeURIComponent(message)}`;
-            window.open(telegramUrl, '_blank');
+            const telegramUrl = `https://t.me/MA_Furniture_bot?text=${encodeURIComponent(message)}`;
             
-            return { success: true, telegram_sent: true, message: 'Заказ открыт в Telegram' };
+            window.open(telegramUrl, '_blank', 'noopener,noreferrer');
+            
+            return { 
+                success: true, 
+                telegram_opened: true,
+                message: 'Telegram открыт для отправки заказа' 
+            };
         } catch (error) {
-            console.error('Ошибка fallback оформления заказа:', error);
-            return { success: false, error: 'Ошибка оформления заказа' };
+            console.error('DataManager: Ошибка при открытии Telegram:', error);
+            return { 
+                success: false, 
+                error: 'Не удалось открыть Telegram' 
+            };
         }
     }
 
     formatOrderMessage(orderData) {
-        let message = '🛒 НОВЫЙ ЗАКАЗ MA FURNITURE\n\n';
+        let message = '🛒 НОВЫЙ ЗАКАЗ MA FURNITURE\\n\\n';
         
+        message += '📦 *Состав заказа:*\\n';
         orderData.items.forEach((item, index) => {
-            message += `${index + 1}. ${item.name}\n`;
-            message += `   Количество: ${item.quantity} шт.\n`;
-            message += `   Цена за шт: ${this.formatPrice(item.price)}\n`;
-            message += `   Сумма: ${this.formatPrice(item.price * item.quantity)}\n\n`;
+            message += `${index + 1}. ${item.name}\\n`;
+            message += `   Количество: ${item.quantity} шт.\\n`;
+            message += `   Цена за шт: ${this.formatPrice(item.price)}\\n`;
+            message += `   Сумма: ${this.formatPrice(item.price * item.quantity)}\\n\\n`;
         });
         
-        message += `💰 ОБЩАЯ СУММА: ${this.formatPrice(orderData.total)}\n\n`;
+        message += `💰 *ОБЩАЯ СУММА: ${this.formatPrice(orderData.total)}*\\n\\n`;
         
-        if (orderData.customer_name) {
-            message += `👤 Клиент: ${orderData.customer_name}\n`;
-        }
-        if (orderData.customer_phone) {
-            message += `📞 Телефон: ${orderData.customer_phone}\n`;
-        }
+        message += '👤 *Данные клиента:*\\n';
+        message += `ФИО: ${orderData.customer_name}\\n`;
+        message += `Телефон: ${orderData.customer_phone}\\n`;
+        
         if (orderData.customer_email) {
-            message += `📧 Email: ${orderData.customer_email}\n`;
+            message += `Email: ${orderData.customer_email}\\n`;
         }
         
-        message += `📅 ${new Date().toLocaleString('ru-RU')}`;
+        if (orderData.customer_address) {
+            message += `Адрес: ${orderData.customer_address}\\n`;
+        }
+        
+        if (orderData.customer_comment) {
+            message += `Комментарий: ${orderData.customer_comment}\\n`;
+        }
+        
+        message += `\\n📅 ${new Date().toLocaleString('ru-RU')}`;
+        message += `\\n\\n🌐 *Заказ с сайта: MA Furniture*`;
         
         return message;
     }
@@ -389,6 +517,37 @@ class DataManager {
             currency: 'RUB',
             minimumFractionDigits: 0
         }).format(price);
+    }
+
+    async checkAPIHealth() {
+        try {
+            const response = await fetch('/api/health');
+            if (response.ok) {
+                const data = await response.json();
+                return {
+                    available: true,
+                    status: data.status,
+                    telegram: data.telegram
+                };
+            }
+        } catch (error) {
+            console.log('DataManager: API для заказов недоступно');
+        }
+        return { available: false };
+    }
+
+    getStats() {
+        const activeProducts = this.getActiveProducts();
+        const totalProducts = activeProducts.length;
+        const featuredProducts = activeProducts.filter(p => p.featured).length;
+        const totalSections = this.getActiveSections().length;
+        
+        return {
+            totalProducts,
+            featuredProducts,
+            totalSections,
+            lastUpdated: new Date().toISOString()
+        };
     }
 }
 

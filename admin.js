@@ -1125,10 +1125,20 @@ class AdminPanel {
 
     saveProducts() {
         localStorage.setItem('adminProducts', JSON.stringify(this.products));
+        console.log('Admin: Сохранено товаров:', this.products.length);
+        if (this.products.length > 0) {
+            console.log('Admin: Пример товара:', this.products[0]);
+        }
+        this.notifyProductsUpdate();
     }
 
     saveSections() {
-        localStorage.setItem('adminSections', JSON.stringify(this.sections));
+        try {
+            localStorage.setItem('adminSections', JSON.stringify(this.sections));
+            console.log('Admin: Разделы сохранены в localStorage');
+        } catch (error) {
+            console.error('Admin: Ошибка сохранения разделов:', error);
+        }
     }
 
     // 🔐 Уведомление об обновлении товаров (для синхронизации с магазином)
@@ -1140,7 +1150,7 @@ class AdminPanel {
         // Также обновляем localStorage для cross-tab синхронизации
         localStorage.setItem('adminProducts', JSON.stringify(this.products));
         
-        console.log('Уведомление об обновлении товаров отправлено');
+        console.log('Admin: Уведомление об обновлении товаров отправлено');
         this.showNotification('Изменения синхронизированы с магазином', 'success');
     }
 
@@ -1153,7 +1163,7 @@ class AdminPanel {
         // Также обновляем localStorage для cross-tab синхронизации
         localStorage.setItem('adminSections', JSON.stringify(this.sections));
         
-        console.log('Уведомление об обновлении разделов отправлено');
+        console.log('Admin: Уведомление об обновлении разделов отправлено');
         this.showNotification('Разделы синхронизированы с магазином', 'success');
     }
 }

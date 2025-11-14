@@ -14,6 +14,8 @@ class DataSync {
         try {
             const adminProducts = JSON.parse(localStorage.getItem(this.adminStorageKey)) || [];
             
+            console.log('DataSync: Синхронизация товаров, найдено в админке:', adminProducts.length);
+            
             if (adminProducts.length > 0) {
                 const shopProducts = adminProducts.map(product => ({
                     id: product.id,
@@ -40,12 +42,14 @@ class DataSync {
                 }));
 
                 localStorage.setItem(this.storageKey, JSON.stringify(shopProducts));
-                console.log(`Синхронизировано ${shopProducts.length} товаров из админ-панели`);
+                console.log(`DataSync: Синхронизировано ${shopProducts.length} товаров из админ-панели`);
                 
                 this.dispatchUpdateEvent();
+            } else {
+                console.log('DataSync: В админ-панели нет товаров для синхронизации');
             }
         } catch (error) {
-            console.error('Ошибка синхронизации:', error);
+            console.error('DataSync: Ошибка синхронизации:', error);
         }
     }
 
@@ -79,17 +83,19 @@ class DataSync {
     setupStorageListener() {
         window.addEventListener('storage', (e) => {
             if (e.key === this.adminStorageKey) {
-                console.log('Обнаружены изменения в админ-панели');
+                console.log('DataSync: Обнаружены изменения в админ-панели через storage event');
                 this.syncProducts();
             }
         });
 
         window.addEventListener('adminProductsUpdated', () => {
+            console.log('DataSync: Обнаружены изменения в админ-панели через custom event');
             this.syncProducts();
         });
     }
 
     dispatchUpdateEvent() {
+        console.log('DataSync: Отправка события обновления товаров');
         const event = new CustomEvent('productsUpdated');
         window.dispatchEvent(event);
     }
